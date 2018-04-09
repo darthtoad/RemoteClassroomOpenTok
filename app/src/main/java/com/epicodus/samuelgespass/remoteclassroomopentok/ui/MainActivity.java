@@ -1,8 +1,11 @@
-package com.epicodus.samuelgespass.remoteclassroomopentok;
+package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+
+import com.epicodus.samuelgespass.remoteclassroomopentok.Constants;
+import com.epicodus.samuelgespass.remoteclassroomopentok.R;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
 import com.opentok.android.Publisher;
@@ -14,6 +17,8 @@ import android.Manifest;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -38,9 +43,13 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private Session mSession;
     private FrameLayout mPublisherViewContainer;
     private FrameLayout mSubscriberViewContainer;
+    private FrameLayout mFragmentContainer;
+    private FrameLayout mVideoFrame;
     private Publisher mPublisher;
     private Subscriber mSubscriber;
     private Button mFlipScreen;
+    private Button mButtonLargeFragment;
+    private Button mButtonSmallFragment;
 
     public void fetchSessionConnectionData() {
         RequestQueue reqQueue = Volley.newRequestQueue(this);
@@ -99,6 +108,14 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mPublisherViewContainer = (FrameLayout)findViewById(R.id.publisher_container);
             mSubscriberViewContainer = (FrameLayout)findViewById(R.id.subscriber_container);
             mFlipScreen = (Button) findViewById(R.id.button_toggle_screen);
+            mButtonLargeFragment = (Button) findViewById(R.id.button_large_fragment);
+            mButtonSmallFragment = (Button) findViewById(R.id.button_small_fragment);
+            mFragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
+            mVideoFrame = (FrameLayout) findViewById(R.id.videoFrame);
+
+            mFlipScreen.setOnClickListener(this);
+            mButtonSmallFragment.setOnClickListener(this);
+            mButtonLargeFragment.setOnClickListener(this);
 
             mSession = new Session.Builder(this, API_KEY, SESSION_ID).build();
             mSession.setSessionListener(this);
@@ -170,6 +187,31 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     public void onClick(View view) {
         if (view == mFlipScreen) {
             mPublisher.swapCamera();
+            Log.e("thing", "onClick: ");
+        }
+
+        if (view == mButtonLargeFragment) {
+            LinearLayout.LayoutParams paramsFragment = (LinearLayout.LayoutParams) mFragmentContainer.getLayoutParams();
+            LinearLayout.LayoutParams paramsMain = (LinearLayout.LayoutParams) mVideoFrame.getLayoutParams();
+            if (paramsFragment.weight > 1) {
+                paramsFragment.weight++;
+                paramsMain.weight--;
+            }
+            mFragmentContainer.setLayoutParams(paramsFragment);
+            mVideoFrame.setLayoutParams(paramsMain);
+            Log.e("thing", "onClick: ");
+        }
+
+        if (view == mButtonSmallFragment) {
+            LinearLayout.LayoutParams paramsFragment = (LinearLayout.LayoutParams) mFragmentContainer.getLayoutParams();
+            LinearLayout.LayoutParams paramsMain = (LinearLayout.LayoutParams) mVideoFrame.getLayoutParams();
+            if (paramsFragment.weight > 1) {
+                paramsFragment.weight--;
+                paramsMain.weight++;
+            }
+            mFragmentContainer.setLayoutParams(paramsFragment);
+            mVideoFrame.setLayoutParams(paramsMain);
+            Log.e("thing", "onClick: ");
         }
     }
 

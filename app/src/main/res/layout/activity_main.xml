@@ -1,28 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.epicodus.samuelgespass.remoteclassroomopentok.MainActivity">
+    android:orientation="vertical"
+    tools:context="com.epicodus.samuelgespass.remoteclassroomopentok.ui.MainActivity">
 
     <FrameLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-
-        <FrameLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/subscriber_container" >
-
-        </FrameLayout>
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="10"
+        android:id="@+id/videoFrame">
 
         <Button
             android:id="@+id/button_toggle_screen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Flip Screen"
-            android:layout_gravity="bottom|center"/>
+            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="10dp"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Make Activity\nlarger"
+            android:id="@+id/button_large_fragment"/>
+
+        <Button
+            android:id="@+id/button_small_fragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:text="Make Activity\nsmaller" />
 
         <FrameLayout
             android:layout_width="90dp"
@@ -36,6 +46,27 @@
             android:background="#FFFFFF" >
 
         </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/subscriber_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </FrameLayout>
     </FrameLayout>
 
-</android.support.constraint.ConstraintLayout>
+    <View android:background="@color/colorAccent"
+        android:layout_width="wrap_content"
+        android:layout_height="2dp"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0"
+        android:id="@+id/fragmentContainer"
+        android:layout_below="@id/videoFrame">
+
+
+    </FrameLayout>
+
+</LinearLayout>
