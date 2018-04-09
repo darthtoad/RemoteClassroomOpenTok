@@ -5,7 +5,7 @@ package com.epicodus.samuelgespass.remoteclassroomopentok;
  */
 
 public class Constants {
-    public static final String API_KEY = BuildConfig.ApiKey;
-    public static final String SESSION_ID = BuildConfig.SessionId;
-    public static final String TOKEN = BuildConfig.Token;
+    public static final String API_KEY = BuildConfig.API_KEY;
+    public static final String SESSION_ID = BuildConfig.SESSION_ID;
+    public static final String TOKEN = BuildConfig.TOKEN;
 }
