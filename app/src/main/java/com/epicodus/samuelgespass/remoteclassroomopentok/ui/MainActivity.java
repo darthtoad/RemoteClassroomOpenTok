@@ -1,5 +1,6 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +16,7 @@ import com.opentok.android.OpentokError;
 import android.support.annotation.NonNull;
 import android.Manifest;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -34,7 +36,7 @@ import org.json.JSONObject;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener {
 
     private static String API_KEY = Constants.API_KEY;
     private static String SESSION_ID = Constants.SESSION_ID;
@@ -96,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         mSelectActivitySpinner = (Spinner) findViewById(R.id.activity_select_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.select_activity_array, android.R.layout.simple_spinner_dropdown_item);
         mSelectActivitySpinner.setAdapter(adapter);
+        mSelectActivitySpinner.setOnItemSelectedListener(this);
 
         requestPermissions();
     }
@@ -220,6 +223,22 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mVideoFrame.setLayoutParams(paramsMain);
             Log.e("thing", "onClick: ");
         }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        if (parent.getItemAtPosition(pos).equals("Memory Game")) {
+            MemoryGameFragment memoryGameFragment = MemoryGameFragment.newInstance();
+            Log.e("Selected", "onItemSelected: ");
+            android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragmentContainer, memoryGameFragment);
+            fragmentTransaction.commit();
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
 }

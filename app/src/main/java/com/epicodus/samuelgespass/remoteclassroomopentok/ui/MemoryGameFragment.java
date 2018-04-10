@@ -19,6 +19,13 @@ public class MemoryGameFragment extends Fragment {
         // Required empty public constructor
     }
 
+    public static MemoryGameFragment newInstance() {
+        MemoryGameFragment memoryGameFragment = new MemoryGameFragment();
+        Bundle args = new Bundle();
+        memoryGameFragment.setArguments(args);
+        return memoryGameFragment;
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
