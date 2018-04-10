@@ -40,16 +40,54 @@
             android:id="@+id/textView-eating"
             android:layout_width="160dp"
             android:layout_height="60dp"
-            android:textSize="40sp"
-            android:textAlignment="center"
             android:background="#867530"
+            android:textAlignment="center"
             android:textColor="#035768"
+            android:textSize="40sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView-running" />
 
-        <Image
+        <ImageButton
+            android:id="@+id/imageButton-running"
+            android:layout_width="148dp"
+            android:layout_height="123dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="48dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/running"
+            app:layout_constraintBottom_toTopOf="@+id/imageButton-sleeping"
+            app:layout_constraintEnd_toStartOf="@+id/imageButton-eating"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView-eating"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <ImageButton
+            android:id="@+id/imageButton-eating"
+            android:layout_width="150dp"
+            android:layout_height="115dp"
+            android:layout_marginBottom="28dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/eating"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.123"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageButton
+            android:id="@+id/imageButton-sleeping"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/sleeping"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/imageButton-eating"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.601" />
 
 
     </android.support.constraint.ConstraintLayout>
