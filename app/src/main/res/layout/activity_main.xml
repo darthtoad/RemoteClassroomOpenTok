@@ -31,8 +31,16 @@
             android:id="@+id/button_small_fragment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
+            android:layout_marginLeft="150dp"
             android:text="Make Activity\nsmaller" />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/activity_select_spinner"
+            android:layout_marginTop="60dp"
+            android:layout_marginLeft="5dp"
+            android:background="@color/colorAccent"/>
 
         <FrameLayout
             android:layout_width="90dp"

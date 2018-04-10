@@ -15,9 +15,11 @@ import com.opentok.android.OpentokError;
 import android.support.annotation.NonNull;
 import android.Manifest;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private Button mFlipScreen;
     private Button mButtonLargeFragment;
     private Button mButtonSmallFragment;
+    private Spinner mSelectActivitySpinner;
 
     public void fetchSessionConnectionData() {
         RequestQueue reqQueue = Volley.newRequestQueue(this);
@@ -89,6 +92,10 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mSelectActivitySpinner = (Spinner) findViewById(R.id.activity_select_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.select_activity_array, android.R.layout.simple_spinner_dropdown_item);
+        mSelectActivitySpinner.setAdapter(adapter);
 
         requestPermissions();
     }

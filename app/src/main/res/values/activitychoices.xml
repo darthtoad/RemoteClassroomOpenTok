@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="select_activity_array">
+        <item>No Activity</item>
+        <item>Memory Game</item>
+    </string-array>
+</resources>
