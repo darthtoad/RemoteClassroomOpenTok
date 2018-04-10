@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         if (view == mButtonLargeFragment) {
             LinearLayout.LayoutParams paramsFragment = (LinearLayout.LayoutParams) mFragmentContainer.getLayoutParams();
             LinearLayout.LayoutParams paramsMain = (LinearLayout.LayoutParams) mVideoFrame.getLayoutParams();
-            if (paramsFragment.weight > 1) {
+            if (paramsMain.weight > 1) {
                 paramsFragment.weight++;
                 paramsMain.weight--;
             }
