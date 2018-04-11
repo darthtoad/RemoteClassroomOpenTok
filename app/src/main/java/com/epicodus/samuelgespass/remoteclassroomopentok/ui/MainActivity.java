@@ -1,5 +1,6 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
+import android.content.SharedPreferences;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.util.Log;
 
 import com.epicodus.samuelgespass.remoteclassroomopentok.Constants;
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
+import com.epicodus.samuelgespass.remoteclassroomopentok.util.OnSessionCreated;
 import com.opentok.android.Connection;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
@@ -37,7 +39,7 @@ import org.json.JSONObject;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener {
+public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener, OnSessionCreated {
 
     private static String API_KEY = Constants.API_KEY;
     private static String SESSION_ID = Constants.SESSION_ID;
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private Button mButtonLargeFragment;
     private Button mButtonSmallFragment;
     private Spinner mSelectActivitySpinner;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
 
     public void fetchSessionConnectionData() {
         RequestQueue reqQueue = Volley.newRequestQueue(this);
@@ -105,6 +109,11 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     }
 
     @Override
+    public void onSessionCreated(Session session) {
+        mSession = session;
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -132,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mSession.setSessionListener(this);
             mSession.connect(TOKEN);
             mSession.setSignalListener(this);
+
 
 
         } else {

@@ -1,9 +1,11 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
+import com.epicodus.samuelgespass.remoteclassroomopentok.util.OnSessionCreated;
+import com.opentok.android.Session;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,6 +34,8 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
     private boolean isRunningMatched = false;
     private boolean isSleepingMatched = false;
     private boolean isEatingMatched = false;
+    private Session mSession;
+    private OnSessionCreated mOnSessionCreated;
 
 
     public MemoryGameFragment() {
@@ -43,6 +49,17 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
         return memoryGameFragment;
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            mOnSessionCreated = (OnSessionCreated) context;
+            Log.e("SUCCESS", "Attached");
+        } catch (ClassCastException e) {
+            Log.e("NOOO", "onAttach: ");
+            throw new ClassCastException("NOOOO " + e.getMessage());
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
