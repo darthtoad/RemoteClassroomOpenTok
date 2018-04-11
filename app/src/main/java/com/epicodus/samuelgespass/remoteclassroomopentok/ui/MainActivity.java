@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.epicodus.samuelgespass.remoteclassroomopentok.Constants;
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
+import com.opentok.android.Connection;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
 import com.opentok.android.Publisher;
@@ -36,7 +37,7 @@ import org.json.JSONObject;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener {
 
     private static String API_KEY = Constants.API_KEY;
     private static String SESSION_ID = Constants.SESSION_ID;
@@ -130,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mSession = new Session.Builder(this, API_KEY, SESSION_ID).build();
             mSession.setSessionListener(this);
             mSession.connect(TOKEN);
+            mSession.setSignalListener(this);
 
 
         } else {
@@ -228,11 +230,21 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         if (parent.getItemAtPosition(pos).equals("Memory Game")) {
-            MemoryGameFragment memoryGameFragment = MemoryGameFragment.newInstance();
-            Log.e("Selected", "onItemSelected: ");
-            android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragmentContainer, memoryGameFragment);
-            fragmentTransaction.commit();
+            mSession.sendSignal("Activity", "Memory Game");
+        }
+    }
+
+    @Override
+    public void onSignalReceived(Session session, String type, String data, Connection connection) {
+        Log.e("signal recieved", "onSignalReceived: ");
+        if (type != null && type.equals("Activity")) {
+            if (data.equals("Memory Game")) {
+                MemoryGameFragment memoryGameFragment = MemoryGameFragment.newInstance();
+                Log.e("Selected", "onItemSelected: ");
+                android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragmentContainer, memoryGameFragment);
+                fragmentTransaction.commit();
+            }
         }
     }
 
