@@ -1,6 +1,7 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
 import android.content.SharedPreferences;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -93,16 +94,10 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         }));
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mSelectActivitySpinner = (Spinner) findViewById(R.id.activity_select_spinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.select_activity_array, android.R.layout.simple_spinner_dropdown_item);
-        mSelectActivitySpinner.setAdapter(adapter);
-        mSelectActivitySpinner.setOnItemSelectedListener(this);
 
         requestPermissions();
     }
@@ -126,6 +121,11 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mButtonSmallFragment = (Button) findViewById(R.id.button_small_fragment);
             mFragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
             mVideoFrame = (FrameLayout) findViewById(R.id.videoFrame);
+            mSelectActivitySpinner = (Spinner) findViewById(R.id.activity_select_spinner);
+            mSelectActivitySpinner.getLayoutParams();
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.select_activity_array, android.R.layout.simple_spinner_dropdown_item);
+            mSelectActivitySpinner.setAdapter(adapter);
+            mSelectActivitySpinner.setOnItemSelectedListener(this);
 
             mFlipScreen.setOnClickListener(this);
             mButtonSmallFragment.setOnClickListener(this);
