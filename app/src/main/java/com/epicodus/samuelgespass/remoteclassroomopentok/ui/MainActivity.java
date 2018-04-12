@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -56,43 +57,10 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private Button mFlipScreen;
     private Button mButtonLargeFragment;
     private Button mButtonSmallFragment;
+    private Button mButtonDisconnect;
     private Spinner mSelectActivitySpinner;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
-
-    public void fetchSessionConnectionData() {
-        RequestQueue reqQueue = Volley.newRequestQueue(this);
-        reqQueue.add(new JsonObjectRequest(Request.Method.GET,
-                "https://remote-classroom-open-tok.herokuapp.com" + "/session",
-                null, new Response.Listener<JSONObject>() {
-
-            @Override
-            public void onResponse(JSONObject response) {
-
-                try {
-                    API_KEY = response.getString("apiKey");
-                    SESSION_ID = response.getString("sessionId");
-                    TOKEN = response.getString("token");
-
-                    Log.i(LOG_TAG, "API_KEY: " + API_KEY);
-                    Log.i(LOG_TAG, "SESSION_ID: " + SESSION_ID);
-                    Log.i(LOG_TAG, "TOKEN: " + TOKEN);
-
-                    mSession = new Session.Builder(MainActivity.this, API_KEY, SESSION_ID).build();
-                    mSession.setSessionListener(MainActivity.this);
-                    mSession.connect(TOKEN);
-
-                } catch (JSONException error) {
-                    Log.e(LOG_TAG, "Web Service error: " + error.getMessage());
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(LOG_TAG, "Web Service error: " + error.getMessage());
-            }
-        }));
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
         String[] perms = { Manifest.permission.INTERNET, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO };
         if (EasyPermissions.hasPermissions(this, perms)) {
+            mButtonDisconnect = (Button) findViewById(R.id.button_disconnect);
             mPublisherViewContainer = (FrameLayout)findViewById(R.id.publisher_container);
             mSubscriberViewContainer = (FrameLayout)findViewById(R.id.subscriber_container);
             mFlipScreen = (Button) findViewById(R.id.button_toggle_screen);
@@ -130,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mFlipScreen.setOnClickListener(this);
             mButtonSmallFragment.setOnClickListener(this);
             mButtonLargeFragment.setOnClickListener(this);
+            mButtonDisconnect.setOnClickListener(this);
 
             mSession = new Session.Builder(this, API_KEY, SESSION_ID).build();
             mSession.setSessionListener(this);
@@ -139,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
 
         } else {
-            EasyPermissions.requestPermissions(this, "This app needs access to your camera and mic to make video calls", RC_VIDEO_APP_PERM, perms);
+            EasyPermissions.requestPermissions(this, "The Remote Classroom needs access to your camera and mic to work", RC_VIDEO_APP_PERM, perms);
         }
     }
 
@@ -228,6 +198,10 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mFragmentContainer.setLayoutParams(paramsFragment);
             mVideoFrame.setLayoutParams(paramsMain);
             Log.e("thing", "onClick: ");
+        }
+
+        if (view == mButtonDisconnect) {
+            mSession.disconnect();
         }
     }
 

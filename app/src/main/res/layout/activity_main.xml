@@ -34,6 +34,14 @@
             android:layout_marginLeft="150dp"
             android:text="Make Activity\nsmaller" />
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_disconnect"
+            android:layout_marginLeft="150dp"
+            android:layout_marginTop="60dp"
+            android:text="Disconnect"/>
+
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
