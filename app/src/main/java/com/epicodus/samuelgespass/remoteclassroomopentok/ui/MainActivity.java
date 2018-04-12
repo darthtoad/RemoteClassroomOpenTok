@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private Button mButtonSmallFragment;
     private Button mButtonDisconnect;
     private Spinner mSelectActivitySpinner;
+    private Button mButtonReconnect;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
@@ -90,6 +91,8 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mButtonSmallFragment = (Button) findViewById(R.id.button_small_fragment);
             mFragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
             mVideoFrame = (FrameLayout) findViewById(R.id.videoFrame);
+            mButtonReconnect = (Button) findViewById(R.id.button_reconnect);
+
             mSelectActivitySpinner = (Spinner) findViewById(R.id.activity_select_spinner);
             mSelectActivitySpinner.getLayoutParams();
             ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.select_activity_array, android.R.layout.simple_spinner_dropdown_item);
@@ -100,17 +103,22 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mButtonSmallFragment.setOnClickListener(this);
             mButtonLargeFragment.setOnClickListener(this);
             mButtonDisconnect.setOnClickListener(this);
+            mButtonReconnect.setOnClickListener(this);
 
-            mSession = new Session.Builder(this, API_KEY, SESSION_ID).build();
-            mSession.setSessionListener(this);
-            mSession.connect(TOKEN);
-            mSession.setSignalListener(this);
+            createSession();
 
 
 
         } else {
             EasyPermissions.requestPermissions(this, "The Remote Classroom needs access to your camera and mic to work", RC_VIDEO_APP_PERM, perms);
         }
+    }
+
+    public void createSession() {
+        mSession = new Session.Builder(this, API_KEY, SESSION_ID).build();
+        mSession.setSessionListener(this);
+        mSession.connect(TOKEN);
+        mSession.setSignalListener(this);
     }
 
     @Override
@@ -202,6 +210,10 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
         if (view == mButtonDisconnect) {
             mSession.disconnect();
+        }
+
+        if (view == mButtonReconnect) {
+            createSession();
         }
     }
 

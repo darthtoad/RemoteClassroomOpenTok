@@ -42,6 +42,13 @@
             android:layout_marginTop="60dp"
             android:text="Disconnect"/>
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_reconnect"
+            android:layout_marginTop="130dp"
+            android:text="Reconnect"/>
+
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
