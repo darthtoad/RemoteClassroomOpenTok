@@ -209,7 +209,19 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         }
 
         if (view == mButtonDisconnect) {
-            mSession.disconnect();
+            if (mPublisher != null) {
+                mPublisherViewContainer.removeView(mPublisher.getView());
+            }
+
+            if (mSubscriber != null) {
+                mSubscriberViewContainer.removeView(mSubscriber.getView());
+            }
+
+            mPublisher = null;
+            mSubscriber = null;
+            mSession = null;
+
+//            mPublisherViewContainer.removeAllViews();
         }
 
         if (view == mButtonReconnect) {
