@@ -1,14 +1,12 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
 import android.content.SharedPreferences;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.epicodus.samuelgespass.remoteclassroomopentok.Constants;
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
-import com.epicodus.samuelgespass.remoteclassroomopentok.util.OnSessionCreated;
 import com.opentok.android.Connection;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
@@ -39,7 +37,7 @@ import org.json.JSONObject;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener, OnSessionCreated {
+public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener {
 
     private static String API_KEY = Constants.API_KEY;
     private static String SESSION_ID = Constants.SESSION_ID;
@@ -69,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
             @Override
             public void onResponse(JSONObject response) {
+
                 try {
                     API_KEY = response.getString("apiKey");
                     SESSION_ID = response.getString("sessionId");
@@ -106,11 +105,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         mSelectActivitySpinner.setOnItemSelectedListener(this);
 
         requestPermissions();
-    }
-
-    @Override
-    public void onSessionCreated(Session session) {
-        mSession = session;
     }
 
     @Override

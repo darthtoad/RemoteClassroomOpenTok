@@ -3,7 +3,6 @@ package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,14 +12,26 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.epicodus.samuelgespass.remoteclassroomopentok.Constants;
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
-import com.epicodus.samuelgespass.remoteclassroomopentok.util.OnSessionCreated;
+import com.opentok.android.Connection;
+import com.opentok.android.OpentokError;
 import com.opentok.android.Session;
+import com.opentok.android.Stream;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MemoryGameFragment extends Fragment implements View.OnClickListener {
+public class MemoryGameFragment extends Fragment implements View.OnClickListener, Session.SessionListener, Session.SignalListener {
     private TextView textViewRunning;
     private TextView textViewSleeping;
     private TextView textViewEating;
@@ -35,7 +46,9 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
     private boolean isSleepingMatched = false;
     private boolean isEatingMatched = false;
     private Session mSession;
-    private OnSessionCreated mOnSessionCreated;
+    private static String API_KEY = Constants.API_KEY;
+    private static String SESSION_ID = Constants.SESSION_ID;
+    private static String TOKEN = Constants.TOKEN;
 
 
     public MemoryGameFragment() {
@@ -49,11 +62,67 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
         return memoryGameFragment;
     }
 
+    public void fetchSessionConnectionData() {
+        RequestQueue reqQueue = Volley.newRequestQueue(getContext());
+        reqQueue.add(new JsonObjectRequest(Request.Method.GET,
+                "https://remote-classroom-open-tok.herokuapp.com" + "/session",
+                null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    API_KEY = response.getString("apiKey");
+                    SESSION_ID = response.getString("sessionId");
+                    TOKEN = response.getString("token");
+
+                    mSession = new Session.Builder(getContext(), API_KEY, SESSION_ID).build();
+                    mSession.setSessionListener(MemoryGameFragment.this);
+                    mSession.setSignalListener(MemoryGameFragment.this);
+                    mSession.connect(TOKEN);
+
+                } catch (JSONException error) {
+                    Log.e("ERROR", "Web Service error: " + error.getMessage());
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("ERROR", "Web Service error: " + error.getMessage());
+            }
+        }));
+    }
+
+    @Override
+    public void onConnected(Session session) {
+
+    }
+
+
+    @Override
+    public void onDisconnected(Session session) {
+
+    }
+
+    @Override
+    public void onStreamReceived(Session session, Stream stream) {
+
+    }
+
+    @Override
+    public void onStreamDropped(Session session, Stream stream) {
+
+    }
+
+    @Override
+    public void onError(Session session, OpentokError opentokError) {
+
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
-            mOnSessionCreated = (OnSessionCreated) context;
+            fetchSessionConnectionData();
             Log.e("SUCCESS", "Attached");
         } catch (ClassCastException e) {
             Log.e("NOOO", "onAttach: ");
@@ -103,132 +172,184 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
     }
 
     @Override
-    public void onClick(View view) {
+    public void onSignalReceived(Session session, String type, String data, Connection connection) {
 
         if (!turnTaken) {
 
-            if (view == textViewEating) {
-                turnTaken = true;
-                textViewEating.setText("eating");
+            if (type.equals("word")) {
+
+                if (data.equals("eating")) {
+                    turnTaken = true;
+                    textViewEating.setText("eating");
+                }
+
+                if (data.equals("running")) {
+                    turnTaken = true;
+                    textViewRunning.setText("running");
+                }
+
+                if (data.equals("sleeping")) {
+                    turnTaken = true;
+                    textViewSleeping.setText("sleeping");
+                }
             }
 
-            if (view == textViewRunning) {
-                turnTaken = true;
-                textViewRunning.setText("running");
-            }
+            if (type.equals("image")) {
 
-            if (view == textViewSleeping) {
-                turnTaken = true;
-                textViewSleeping.setText("sleeping");
-            }
+                if (data.equals("eating")) {
+                    turnTaken = true;
+                    isImageButtonEatingFlipped = true;
+                    imageButtonEating.setImageResource(R.drawable.eating);
+                }
 
-            if (view == imageButtonEating) {
-                turnTaken = true;
-                isImageButtonEatingFlipped = true;
-                imageButtonEating.setImageResource(R.drawable.eating);
-            }
+                if (data.equals("running")) {
+                    turnTaken = true;
+                    isImageButtonRunningFlipped = true;
+                    imageButtonRunning.setImageResource(R.drawable.running);
+                }
 
-            if (view == imageButtonRunning) {
-                turnTaken = true;
-                isImageButtonRunningFlipped = true;
-                imageButtonRunning.setImageResource(R.drawable.running);
-            }
+                if (data.equals("sleeping")) {
+                    turnTaken = true;
+                    isImageButtonSleepingFlipped = true;
+                    imageButtonSleeping.setImageResource(R.drawable.sleeping);
+                }
 
-            if (view == imageButtonSleeping) {
-                turnTaken = true;
-                isImageButtonSleepingFlipped = true;
-                imageButtonSleeping.setImageResource(R.drawable.sleeping);
             }
-
         }
 
         if (turnTaken) {
+            if (type.equals("word")) {
 
-            if (view == textViewEating && !textViewEating.getText().equals("eating")) {
-                turnTaken = false;
-                if (isImageButtonEatingFlipped) {
-                    Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-                    textViewEating.setClickable(false);
-                    imageButtonEating.setClickable(false);
-                    textViewEating.setText("eating");
-                    isEatingMatched = true;
-                } else {
-                    Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
-                    resetViews();
+                if (data.equals("eating")) {
+                    if (!textViewEating.getText().equals("eating")) {
+                        turnTaken = false;
+                        if (isImageButtonEatingFlipped) {
+                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
+                            textViewEating.setClickable(false);
+                            imageButtonEating.setClickable(false);
+                            textViewEating.setText("eating");
+                            isEatingMatched = true;
+                        } else {
+                            Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
+                            resetViews();
+                        }
+                    }
                 }
-            }
 
-            if (view == textViewRunning && !textViewRunning.getText().equals("running")) {
-                turnTaken = false;
-                if (isImageButtonRunningFlipped) {
-                    Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-                    textViewRunning.setClickable(false);
-                    imageButtonRunning.setClickable(false);
-                    textViewRunning.setText("running");
-                    isRunningMatched = true;
-                } else {
-                    Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
-                    resetViews();
+                if (data.equals("running")) {
+                    if (!textViewRunning.getText().equals("running")) {
+                        turnTaken = false;
+                        if (isImageButtonRunningFlipped) {
+                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
+                            textViewRunning.setClickable(false);
+                            imageButtonRunning.setClickable(false);
+                            textViewRunning.setText("running");
+                            isRunningMatched = true;
+                        } else {
+                            Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
+                            resetViews();
+                        }
+                    }
                 }
-            }
 
-            if (view == textViewSleeping && !textViewSleeping.getText().equals("sleeping")) {
-                turnTaken = false;
-                if (isImageButtonSleepingFlipped) {
-                    Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-                    textViewSleeping.setClickable(false);
-                    imageButtonSleeping.setClickable(false);
-                    textViewSleeping.setText("sleeping");
-                    isSleepingMatched = true;
-                } else {
-                    Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
-                    resetViews();
-                }
-            }
-
-            if (view == imageButtonEating && !isImageButtonEatingFlipped) {
-                turnTaken = false;
-                if (textViewEating.getText().equals("eating")) {
-                    Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-                    textViewEating.setClickable(false);
-                    imageButtonEating.setClickable(false);
-                    imageButtonEating.setImageResource(R.drawable.eating);
-                    isEatingMatched = true;
-                } else {
-                    Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
-                    resetViews();
-                }
-            }
-
-            if (view == imageButtonRunning && !isImageButtonRunningFlipped) {
-                turnTaken = false;
-                if (textViewRunning.getText().equals("running")) {
-                    Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-                    textViewRunning.setClickable(false);
-                    imageButtonRunning.setClickable(false);
-                    imageButtonRunning.setImageResource(R.drawable.running);
-                    isRunningMatched = true;
-                } else {
-                    Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
-                    resetViews();
+                if (data.equals("sleeping")) {
+                    if (!textViewSleeping.getText().equals("sleeping")) {
+                        turnTaken = false;
+                        if (isImageButtonSleepingFlipped) {
+                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
+                            textViewSleeping.setClickable(false);
+                            imageButtonSleeping.setClickable(false);
+                            textViewSleeping.setText("sleeping");
+                            isSleepingMatched = true;
+                        } else {
+                            Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
+                            resetViews();
+                        }
+                    }
                 }
 
             }
 
-            if (view == imageButtonSleeping && !isImageButtonSleepingFlipped) {
-                turnTaken = false;
-                if (textViewSleeping.getText().equals("sleeping")) {
-                    Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-                    textViewSleeping.setClickable(false);
-                    imageButtonSleeping.setClickable(false);
-                    imageButtonSleeping.setImageResource(R.drawable.sleeping);
-                    isSleepingMatched = true;
-                } else {
-                    Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
-                    resetViews();
-                }
-            }
+            if (type.equals("image")) {
 
+                if (data.equals("eating")) {
+                    if (!isImageButtonEatingFlipped) {
+                        turnTaken = false;
+                        if (textViewEating.getText().equals("eating")) {
+                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
+                            textViewEating.setClickable(false);
+                            imageButtonEating.setClickable(false);
+                            imageButtonEating.setImageResource(R.drawable.eating);
+                            isEatingMatched = true;
+                        } else {
+                            Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
+                            resetViews();
+                        }
+                    }
+                }
+
+                if (data.equals("running")) {
+                    if (!isImageButtonRunningFlipped) {
+                        turnTaken = false;
+                        if (textViewRunning.getText().equals("running")) {
+                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
+                            textViewRunning.setClickable(false);
+                            imageButtonRunning.setClickable(false);
+                            imageButtonRunning.setImageResource(R.drawable.running);
+                            isRunningMatched = true;
+                        } else {
+                            Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
+                            resetViews();
+                        }
+
+                    }
+                }
+
+                if (data.equals("sleeping")) {
+                    if (!isImageButtonSleepingFlipped) {
+                        turnTaken = false;
+                        if (textViewSleeping.getText().equals("sleeping")) {
+                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
+                            textViewSleeping.setClickable(false);
+                            imageButtonSleeping.setClickable(false);
+                            imageButtonSleeping.setImageResource(R.drawable.sleeping);
+                            isSleepingMatched = true;
+                        } else {
+                            Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
+                            resetViews();
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+
+        if (view == textViewEating) {
+            mSession.sendSignal("word", "eating");
+        }
+
+        if (view == textViewRunning) {
+            mSession.sendSignal("word", "running");
+        }
+
+        if (view == textViewSleeping) {
+            mSession.sendSignal("word", "sleeping");
+        }
+
+        if (view == imageButtonEating) {
+            mSession.sendSignal("image", "eating");
+        }
+
+        if (view == imageButtonRunning) {
+            mSession.sendSignal("image", "running");
+        }
+
+        if (view == imageButtonSleeping) {
+            mSession.sendSignal("image", "sleeping");
         }
 
     }
