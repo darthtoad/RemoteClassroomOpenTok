@@ -1,7 +1,6 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
 import android.content.SharedPreferences;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,11 +41,12 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener, OnSessionCreated {
 
     private static String API_KEY = Constants.API_KEY;
-    private static String SESSION_ID = Constants.SESSION_ID;
-    private static String TOKEN = Constants.TOKEN;
+    private static String API_SECRET = Constants.API_SECRET;
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final int RC_SETTINGS_SCREEN_PERM = 123;
     private static final int RC_VIDEO_APP_PERM = 124;
+    String sessionId;
+    String token;
     private Session mSession;
     private FrameLayout mPublisherViewContainer;
     private FrameLayout mSubscriberViewContainer;
@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private Button mFlipScreen;
     private Button mButtonLargeFragment;
     private Button mButtonSmallFragment;
+    private Button mCreateSession;
     private Spinner mSelectActivitySpinner;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
@@ -71,16 +72,16 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             public void onResponse(JSONObject response) {
                 try {
                     API_KEY = response.getString("apiKey");
-                    SESSION_ID = response.getString("sessionId");
-                    TOKEN = response.getString("token");
+                    sessionId = response.getString("sessionId");
+                    token = response.getString("token");
 
                     Log.i(LOG_TAG, "API_KEY: " + API_KEY);
-                    Log.i(LOG_TAG, "SESSION_ID: " + SESSION_ID);
-                    Log.i(LOG_TAG, "TOKEN: " + TOKEN);
+                    Log.i(LOG_TAG, "SESSION_ID: " + sessionId);
+                    Log.i(LOG_TAG, "TOKEN: " + token);
 
-                    mSession = new Session.Builder(MainActivity.this, API_KEY, SESSION_ID).build();
+                    mSession = new Session.Builder(MainActivity.this, API_KEY, sessionId).build();
                     mSession.setSessionListener(MainActivity.this);
-                    mSession.connect(TOKEN);
+                    mSession.connect(token);
 
                 } catch (JSONException error) {
                     Log.e(LOG_TAG, "Web Service error: " + error.getMessage());
@@ -127,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         if (EasyPermissions.hasPermissions(this, perms)) {
             mPublisherViewContainer = (FrameLayout)findViewById(R.id.publisher_container);
             mSubscriberViewContainer = (FrameLayout)findViewById(R.id.subscriber_container);
+            mCreateSession = (Button) findViewById(R.id.create_session);
             mFlipScreen = (Button) findViewById(R.id.button_toggle_screen);
             mButtonLargeFragment = (Button) findViewById(R.id.button_large_fragment);
             mButtonSmallFragment = (Button) findViewById(R.id.button_small_fragment);
@@ -136,16 +138,16 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mFlipScreen.setOnClickListener(this);
             mButtonSmallFragment.setOnClickListener(this);
             mButtonLargeFragment.setOnClickListener(this);
+            mCreateSession.setOnClickListener(this);
 
-            mSession = new Session.Builder(this, API_KEY, SESSION_ID).build();
-            mSession.setSessionListener(this);
-            mSession.connect(TOKEN);
-            mSession.setSignalListener(this);
 
+            Log.i(LOG_TAG, "requestPermissions success");
 
 
         } else {
             EasyPermissions.requestPermissions(this, "This app needs access to your camera and mic to make video calls", RC_VIDEO_APP_PERM, perms);
+            Log.e(LOG_TAG, "requestPermissions failed");
+
         }
     }
 
@@ -207,6 +209,15 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
     @Override
     public void onClick(View view) {
+        if (view == mCreateSession) {
+            fetchSessionConnectionData();
+            Log.i(LOG_TAG, "Session ID: " + sessionId);
+            mSession = new Session.Builder(this, API_KEY, sessionId).build();
+            mSession.setSessionListener(this);
+            mSession.connect(token);
+            mSession.setSignalListener(this);
+        }
+
         if (view == mFlipScreen) {
             mPublisher.swapCamera();
             Log.e("thing", "onClick: ");
@@ -264,4 +275,3 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     }
 
 }
-// 101e71c5ab49051565679d649968d0fd2f08c155
