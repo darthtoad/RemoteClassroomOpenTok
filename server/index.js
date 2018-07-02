@@ -21,7 +21,7 @@ app.get('/session', function(req, res) {
 app.get('/token/:id', function(req, res) {
     const sessionId = req.params.id;
     token = opentok.generateToken(sessionId);
-    res.send(token);
+    res.send({token: token});
 })
 
 const requestHandler = (request, response) => {
