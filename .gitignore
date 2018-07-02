@@ -9,3 +9,5 @@
 /captures
 .externalNativeBuild
 /server/constants.js
+/server/node_modules/
+/server/dist
