@@ -8,6 +8,9 @@ import android.util.Log;
 import com.epicodus.samuelgespass.remoteclassroomopentok.Constants;
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
 import com.epicodus.samuelgespass.remoteclassroomopentok.util.OnSessionCreated;
+import com.opentok.OpenTok;
+import com.opentok.Role;
+import com.opentok.TokenOptions;
 import com.opentok.android.Connection;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
@@ -21,6 +24,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -31,6 +35,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.opentok.exception.OpenTokException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,9 +63,27 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private Button mButtonLargeFragment;
     private Button mButtonSmallFragment;
     private Button mCreateSession;
+    private Button mJoinSession;
+    private EditText mSessionIdText;
     private Spinner mSelectActivitySpinner;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
+
+    public void connectToSession(String sessionId) throws OpenTokException {
+
+//        OpenTok openTok = new com.opentok.OpenTok(Integer.parseInt(API_KEY), API_SECRET);
+//        String token = openTok.generateToken(sessionId, new TokenOptions.Builder()
+//                .role(Role.SUBSCRIBER)
+//                .expireTime((System.currentTimeMillis() / 1000L) + (7 * 24 * 60 * 60)) // in one week
+//                .build());
+//        try {
+//            mSession.connect(token);
+//        } catch (NullPointerException ex) {
+//            mSession = new Session.Builder(MainActivity.this, API_KEY, sessionId).build();
+//            mSession.setSessionListener(MainActivity.this);
+//            mSession.connect(token);
+//        }
+    }
 
     public void fetchSessionConnectionData() {
         RequestQueue reqQueue = Volley.newRequestQueue(this);
@@ -129,16 +152,19 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mPublisherViewContainer = (FrameLayout)findViewById(R.id.publisher_container);
             mSubscriberViewContainer = (FrameLayout)findViewById(R.id.subscriber_container);
             mCreateSession = (Button) findViewById(R.id.create_session);
+            mJoinSession = (Button) findViewById(R.id.join_session);
             mFlipScreen = (Button) findViewById(R.id.button_toggle_screen);
             mButtonLargeFragment = (Button) findViewById(R.id.button_large_fragment);
             mButtonSmallFragment = (Button) findViewById(R.id.button_small_fragment);
             mFragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
             mVideoFrame = (FrameLayout) findViewById(R.id.videoFrame);
+            mSessionIdText = (EditText) findViewById(R.id.session_id_text);
 
             mFlipScreen.setOnClickListener(this);
             mButtonSmallFragment.setOnClickListener(this);
             mButtonLargeFragment.setOnClickListener(this);
             mCreateSession.setOnClickListener(this);
+            mJoinSession.setOnClickListener(this);
 
 
             Log.i(LOG_TAG, "requestPermissions success");
@@ -216,6 +242,15 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mSession.setSessionListener(this);
             mSession.connect(token);
             mSession.setSignalListener(this);
+        }
+
+        if (view == mJoinSession) {
+            String id = mSessionIdText.getText().toString();
+            try {
+                connectToSession(id);
+            } catch (OpenTokException ex) {
+                Log.e(LOG_TAG, ex.toString());
+            }
         }
 
         if (view == mFlipScreen) {
