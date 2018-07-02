@@ -64,25 +64,42 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private Button mButtonSmallFragment;
     private Button mCreateSession;
     private Button mJoinSession;
+    private Button mDisconnect;
     private EditText mSessionIdText;
     private Spinner mSelectActivitySpinner;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
-    public void connectToSession(String sessionId) throws OpenTokException {
+    public void connectToSession(String arg) throws OpenTokException {
+        final String sessionId = arg;
+        RequestQueue reqQueue = Volley.newRequestQueue(this);
+        String url = "http://192.168.1.64:3000/token/" + sessionId;
+        Log.e(LOG_TAG, url);
+        reqQueue.add(new JsonObjectRequest(Request.Method.GET,
+                url,
+                null, new Response.Listener<JSONObject>() {
 
-//        OpenTok openTok = new com.opentok.OpenTok(Integer.parseInt(API_KEY), API_SECRET);
-//        String token = openTok.generateToken(sessionId, new TokenOptions.Builder()
-//                .role(Role.SUBSCRIBER)
-//                .expireTime((System.currentTimeMillis() / 1000L) + (7 * 24 * 60 * 60)) // in one week
-//                .build());
-//        try {
-//            mSession.connect(token);
-//        } catch (NullPointerException ex) {
-//            mSession = new Session.Builder(MainActivity.this, API_KEY, sessionId).build();
-//            mSession.setSessionListener(MainActivity.this);
-//            mSession.connect(token);
-//        }
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    token = response.getString("token");
+
+                    Log.i(LOG_TAG, "TOKEN: " + token);
+
+                    mSession = new Session.Builder(MainActivity.this, API_KEY, sessionId).build();
+                    mSession.setSessionListener(MainActivity.this);
+                    mSession.connect(token);
+
+                } catch (JSONException error) {
+                    Log.e(LOG_TAG, "Web Service error2: " + error.getMessage());
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(LOG_TAG, "Web Service error1: " + error.getMessage());
+            }
+        }));
     }
 
     public void fetchSessionConnectionData() {
@@ -156,6 +173,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mFlipScreen = (Button) findViewById(R.id.button_toggle_screen);
             mButtonLargeFragment = (Button) findViewById(R.id.button_large_fragment);
             mButtonSmallFragment = (Button) findViewById(R.id.button_small_fragment);
+            mDisconnect = (Button) findViewById(R.id.disconnect);
             mFragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
             mVideoFrame = (FrameLayout) findViewById(R.id.videoFrame);
             mSessionIdText = (EditText) findViewById(R.id.session_id_text);
@@ -165,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mButtonLargeFragment.setOnClickListener(this);
             mCreateSession.setOnClickListener(this);
             mJoinSession.setOnClickListener(this);
+            mDisconnect.setOnClickListener(this);
 
 
             Log.i(LOG_TAG, "requestPermissions success");
@@ -251,6 +270,10 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             } catch (OpenTokException ex) {
                 Log.e(LOG_TAG, ex.toString());
             }
+        }
+
+        if (view == mDisconnect) {
+            mSession.disconnect();
         }
 
         if (view == mFlipScreen) {

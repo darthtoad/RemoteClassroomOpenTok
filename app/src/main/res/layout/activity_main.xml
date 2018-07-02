@@ -22,6 +22,15 @@
             />
 
         <Button
+            android:id="@+id/disconnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Disconnect"
+            android:layout_gravity="top|right"
+            android:layout_marginTop="60dp"
+            />
+
+        <Button
             android:id="@+id/button_toggle_screen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -55,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="120dp"
             android:layout_marginLeft="5dp"
-            android:text="1_MX40NjA5NzQzMn5-MTUzMDIzNzMxMDg0MX54VDh3TGdhQmJhUnIvWi9ua29WbnJmK3B-fg"
+            android:text="2_MX40NjA5NzQzMn5-MTUzMDU1NTIxMjY2M35EOTBtSFd2TC9kRndZZFlyOVJ5VVpBdkt-fg"
             android:id="@+id/session_id_text"
             />
 
