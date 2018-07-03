@@ -11,3 +11,4 @@
 /server/constants.js
 /server/node_modules/
 /server/dist
+/app/google-services.json
