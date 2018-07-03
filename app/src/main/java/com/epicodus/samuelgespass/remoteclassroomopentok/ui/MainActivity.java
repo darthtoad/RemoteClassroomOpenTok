@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private static final int RC_VIDEO_APP_PERM = 124;
     String sessionId;
     String token;
+    private boolean isConnected = false;
     private Session mSession;
     private FrameLayout mPublisherViewContainer;
     private FrameLayout mSubscriberViewContainer;
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
                     mSession = new Session.Builder(MainActivity.this, API_KEY, sessionId).build();
                     mSession.setSessionListener(MainActivity.this);
                     mSession.connect(token);
+                    isConnected = true;
 
                 } catch (JSONException error) {
                     Log.e(LOG_TAG, "Web Service error2: " + error.getMessage());
@@ -210,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     @Override
     public void onDisconnected(Session session) {
         Log.i(LOG_TAG, "Session Disconnected");
+        isConnected = false;
     }
 
     @Override
@@ -273,7 +276,9 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         }
 
         if (view == mDisconnect) {
-            mSession.disconnect();
+            if (isConnected) {
+                mSession.disconnect();
+            }
         }
 
         if (view == mFlipScreen) {
