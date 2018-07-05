@@ -21,22 +21,24 @@
             android:layout_gravity="top|right"
             />
 
-        <Button
+        <ImageButton
             android:id="@+id/disconnect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Disconnect"
             android:layout_gravity="top|right"
             android:layout_marginTop="60dp"
+            android:elevation="3dp"
             />
 
-        <Button
+        <ImageButton
             android:id="@+id/button_toggle_screen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Flip Screen"
             android:layout_gravity="bottom|center"
-            android:layout_marginBottom="10dp"/>
+            android:layout_marginLeft="135dp"
+            android:layout_marginBottom="10dp"
+            android:elevation="3dp"
+            />
 
         <Button
             android:layout_width="wrap_content"
@@ -57,23 +59,28 @@
             android:id="@+id/activity_select_spinner"
             android:layout_marginTop="60dp"
             android:layout_marginLeft="5dp"
-            android:background="@color/colorAccent"/>
+            android:background="@color/colorAccent"
+            android:elevation="3dp"
+            />
 
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="120dp"
             android:layout_marginLeft="5dp"
-            android:text="2_MX40NjA5NzQzMn5-MTUzMDU1NTIxMjY2M35EOTBtSFd2TC9kRndZZFlyOVJ5VVpBdkt-fg"
+            android:text="1_MX40NjA5NzQzMn5-MTUzMDgwNzczMDMxMX4vMTlFcUxjNG84L0ovL2pIeUlpbjNUOGR-fg"
             android:id="@+id/session_id_text"
+            android:elevation="3dp"
             />
 
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="180dp"
             android:layout_marginLeft="5dp"
-            android:id="@+id/join_session"/>
+            android:id="@+id/join_session"
+            android:elevation="3dp"
+            />
 
         <FrameLayout
             android:layout_width="90dp"

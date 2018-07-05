@@ -1,10 +1,15 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.Formatter;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.epicodus.samuelgespass.remoteclassroomopentok.Constants;
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
 import com.epicodus.samuelgespass.remoteclassroomopentok.util.OnSessionCreated;
@@ -26,6 +31,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -61,21 +67,28 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private FrameLayout mVideoFrame;
     private Publisher mPublisher;
     private Subscriber mSubscriber;
-    private Button mFlipScreen;
+    private ImageButton mFlipScreen;
     private Button mButtonLargeFragment;
     private Button mButtonSmallFragment;
     private Button mCreateSession;
-    private Button mJoinSession;
-    private Button mDisconnect;
+    private ImageButton mJoinSession;
+    private ImageButton mDisconnect;
     private EditText mSessionIdText;
     private Spinner mSelectActivitySpinner;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
+    public int getImage(String imageName) {
+
+        int drawableResourceId = this.getResources().getIdentifier(imageName, "drawable", getApplicationContext().getPackageName());
+
+        return drawableResourceId;
+    }
+
     public void connectToSession(String arg) throws OpenTokException {
         final String sessionId = arg;
         RequestQueue reqQueue = Volley.newRequestQueue(this);
-        String url = "http://192.168.1.64:3000/token/" + sessionId;
+        String url = "https://server-iwmajgvwxy.now.sh/token/" + sessionId;
         Log.e(LOG_TAG, url);
         reqQueue.add(new JsonObjectRequest(Request.Method.GET,
                 url,
@@ -125,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
                     mSession = new Session.Builder(MainActivity.this, API_KEY, sessionId).build();
                     mSession.setSessionListener(MainActivity.this);
                     mSession.connect(token);
+                    mSessionIdText.setText(sessionId);
 
                 } catch (JSONException error) {
                     Log.e(LOG_TAG, "Web Service error: " + error.getMessage());
@@ -172,14 +186,29 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mPublisherViewContainer = (FrameLayout)findViewById(R.id.publisher_container);
             mSubscriberViewContainer = (FrameLayout)findViewById(R.id.subscriber_container);
             mCreateSession = (Button) findViewById(R.id.create_session);
-            mJoinSession = (Button) findViewById(R.id.join_session);
-            mFlipScreen = (Button) findViewById(R.id.button_toggle_screen);
+            mJoinSession = (ImageButton) findViewById(R.id.join_session);
+            mFlipScreen = (ImageButton) findViewById(R.id.button_toggle_screen);
             mButtonLargeFragment = (Button) findViewById(R.id.button_large_fragment);
             mButtonSmallFragment = (Button) findViewById(R.id.button_small_fragment);
-            mDisconnect = (Button) findViewById(R.id.disconnect);
+            mDisconnect = (ImageButton) findViewById(R.id.disconnect);
             mFragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
             mVideoFrame = (FrameLayout) findViewById(R.id.videoFrame);
             mSessionIdText = (EditText) findViewById(R.id.session_id_text);
+
+            Glide.with(this)
+                    .load(getImage("flip"))
+                    .apply(new RequestOptions().override(50, 50))
+                    .into(mFlipScreen);
+
+            Glide.with(this)
+                    .load(getImage("disconnect"))
+                    .apply(new RequestOptions().override(50, 50))
+                    .into(mDisconnect);
+
+            Glide.with(this)
+                    .load(getImage("connect"))
+                    .apply(new RequestOptions().override(50, 50))
+                    .into(mJoinSession);
 
             mFlipScreen.setOnClickListener(this);
             mButtonSmallFragment.setOnClickListener(this);
