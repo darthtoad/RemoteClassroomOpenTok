@@ -28,6 +28,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -153,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
     @Override
     public void onSessionCreated(Session session) {
-        mSession = session;
+        Log.e(LOG_TAG, "onSessionCreated listener");
     }
 
     @Override
@@ -166,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     @AfterPermissionGranted(RC_VIDEO_APP_PERM)
     private void requestPermissions() {
 
-        String[] perms = { Manifest.permission.INTERNET, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO };
+        String[] perms = { Manifest.permission.INTERNET, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_NETWORK_STATE };
         if (EasyPermissions.hasPermissions(this, perms)) {
             mPublisherViewContainer = (FrameLayout)findViewById(R.id.publisher_container);
             mSubscriberViewContainer = (FrameLayout)findViewById(R.id.subscriber_container);
@@ -200,7 +201,10 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
     @Override
     public void onConnected(Session session) {
-        Log.i(LOG_TAG, "Session Connected");
+        Log.e(LOG_TAG, "Session Connected");
+        isConnected = true;
+        mSession = session;
+        mSession.setSignalListener(this);
 
         mPublisher = new Publisher.Builder(this).build();
         mPublisher.setPublisherListener(this);
@@ -263,7 +267,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mSession = new Session.Builder(this, API_KEY, sessionId).build();
             mSession.setSessionListener(this);
             mSession.connect(token);
-            mSession.setSignalListener(this);
         }
 
         if (view == mJoinSession) {
@@ -313,8 +316,16 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        if (parent.getItemAtPosition(pos).equals("Memory Game")) {
-            mSession.sendSignal("Activity", "Memory Game");
+        Log.e(LOG_TAG, "Item Selected");
+        if (isConnected) {
+            Log.e(LOG_TAG, "Connected");
+            if (parent.getItemAtPosition(pos).equals("Memory Game")) {
+                Log.e(LOG_TAG, "Memory Game Selected");
+                mSession.sendSignal("Activity", "Memory Game");
+                Log.e(LOG_TAG, "Signal sent");
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "Please connect to a session", Toast.LENGTH_LONG);
         }
     }
 

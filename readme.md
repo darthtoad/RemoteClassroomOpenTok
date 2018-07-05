@@ -12,6 +12,8 @@ _This app is geared towards teaching foreign languages on a smartphone. One of t
 
 | Spec | Input | Output |
 | :-------------     | :------------- | :------------- |
+| It can create a user | create user | creates user |
+| A user can sign in | sign in | signs in |
 | It can create a session | create session | creates session |
 | It can connect to a session given a session id | mSession.createToken(sessionId) | Connects to session |
 | It can send receive video and audio from another user | Two users connect | Shows audio and video from other user |
@@ -27,8 +29,6 @@ _This app is geared towards teaching foreign languages on a smartphone. One of t
 
 * Change buttons in the video frame to images
 * Enable dragging for division bar to make bottom frame larger or smaller
-* Create login screen
-* Keep track of users
 * Differentiate between students and teachers
 * Create website so teachers can make activities
 * Add more activities
@@ -45,7 +45,7 @@ _This app is geared towards teaching foreign languages on a smartphone. One of t
 * Go to [TokBox](https://TokBox.com/). Create an account and start a project. Find your API key, create a SessionId, and generate a token.
 * Create a file in your root directory called "gradle.properties". This file should have the following content: org.gradle.jvmargs=-Xmx1536m  ApiKey = "API KEY HERE" ApiSecret = "API SECRET HERE"
 * Create a file in the server folder called constants.js. This file should have the following content: API_KEY = "API KEY HERE"  SESSION_ID = "SESSION ID HERE"
-* Open a terminal and navigate to session. Enter "npm run start" to start the server at /* your ip address */:3000
+* Open a terminal and navigate to session. Enter "npm run start" to start the server at http://'your ip address':3000
 * Run project
 
 ## Known Bugs

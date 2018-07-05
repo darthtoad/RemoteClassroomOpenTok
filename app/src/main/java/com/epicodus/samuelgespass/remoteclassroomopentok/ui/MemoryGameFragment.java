@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
 import com.epicodus.samuelgespass.remoteclassroomopentok.util.OnSessionCreated;
 import com.opentok.android.Session;
@@ -49,6 +50,13 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
         return memoryGameFragment;
     }
 
+    public int getImage(String imageName) {
+
+        int drawableResourceId = this.getResources().getIdentifier(imageName, "drawable", getContext().getPackageName());
+
+        return drawableResourceId;
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -74,6 +82,10 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
         imageButtonRunning = (ImageButton) view.findViewById(R.id.imageButton_running);
         imageButtonSleeping = (ImageButton) view.findViewById(R.id.imageButton_sleeping);
 
+        Glide.with(this).load(getImage("card")).into(imageButtonEating);
+        Glide.with(this).load(getImage("card")).into(imageButtonRunning);
+        Glide.with(this).load(getImage("card")).into(imageButtonSleeping);
+
         textViewEating.setOnClickListener(this);
         textViewSleeping.setOnClickListener(this);
         textViewRunning.setOnClickListener(this);
@@ -88,17 +100,17 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
     private void resetViews() {
         if (!isRunningMatched) {
             textViewRunning.setText("");
-            imageButtonRunning.setImageResource(R.drawable.card);
+            Glide.with(this).load(getImage("card")).into(imageButtonRunning);
         }
 
         if (!isEatingMatched) {
             textViewEating.setText("");
-            imageButtonEating.setImageResource(R.drawable.card);
+            Glide.with(this).load(getImage("card")).into(imageButtonEating);
         }
 
         if (!isSleepingMatched) {
             textViewSleeping.setText("");
-            imageButtonSleeping.setImageResource(R.drawable.card);
+            Glide.with(this).load(getImage("card")).into(imageButtonSleeping);
         }
     }
 
@@ -125,19 +137,19 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
             if (view == imageButtonEating) {
                 turnTaken = true;
                 isImageButtonEatingFlipped = true;
-                imageButtonEating.setImageResource(R.drawable.eating);
+                Glide.with(this).load(getImage("eating")).into(imageButtonEating);
             }
 
             if (view == imageButtonRunning) {
                 turnTaken = true;
                 isImageButtonRunningFlipped = true;
-                imageButtonRunning.setImageResource(R.drawable.running);
+                Glide.with(this).load(getImage("running")).into(imageButtonRunning);
             }
 
             if (view == imageButtonSleeping) {
                 turnTaken = true;
                 isImageButtonSleepingFlipped = true;
-                imageButtonSleeping.setImageResource(R.drawable.sleeping);
+                Glide.with(this).load(getImage("sleeping")).into(imageButtonSleeping);
             }
 
         }
@@ -192,7 +204,7 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
                     Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
                     textViewEating.setClickable(false);
                     imageButtonEating.setClickable(false);
-                    imageButtonEating.setImageResource(R.drawable.eating);
+                    Glide.with(this).load(getImage("eating")).into(imageButtonEating);
                     isEatingMatched = true;
                 } else {
                     Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
@@ -206,7 +218,7 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
                     Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
                     textViewRunning.setClickable(false);
                     imageButtonRunning.setClickable(false);
-                    imageButtonRunning.setImageResource(R.drawable.running);
+                    Glide.with(this).load(getImage("running")).into(imageButtonRunning);
                     isRunningMatched = true;
                 } else {
                     Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
@@ -221,7 +233,7 @@ public class MemoryGameFragment extends Fragment implements View.OnClickListener
                     Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
                     textViewSleeping.setClickable(false);
                     imageButtonSleeping.setClickable(false);
-                    imageButtonSleeping.setImageResource(R.drawable.sleeping);
+                    Glide.with(this).load(getImage("sleeping")).into(imageButtonSleeping);
                     isSleepingMatched = true;
                 } else {
                     Toast.makeText(getContext(), "Try again", Toast.LENGTH_SHORT).show();
