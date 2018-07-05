@@ -27,7 +27,6 @@ _This app is geared towards teaching foreign languages on a smartphone. One of t
 
 ## Future Features
 
-* Change buttons in the video frame to images
 * Enable dragging for division bar to make bottom frame larger or smaller
 * Differentiate between students and teachers
 * Create website so teachers can make activities
@@ -44,8 +43,6 @@ _This app is geared towards teaching foreign languages on a smartphone. One of t
 * Open the project in Android Studio
 * Go to [TokBox](https://TokBox.com/). Create an account and start a project. Find your API key, create a SessionId, and generate a token.
 * Create a file in your root directory called "gradle.properties". This file should have the following content: org.gradle.jvmargs=-Xmx1536m  ApiKey = "API KEY HERE" ApiSecret = "API SECRET HERE"
-* Create a file in the server folder called constants.js. This file should have the following content: API_KEY = "API KEY HERE"  SESSION_ID = "SESSION ID HERE"
-* Open a terminal and navigate to session. Enter "npm run start" to start the server at http://'your ip address':3000
 * Run project
 
 ## Known Bugs
@@ -65,6 +62,8 @@ _This project currently has no known bugs. If you find any, please [message](mai
 * _Node.js_
 * _Express.js_
 * _Babel_
+* _zeit.co_
+* _Heroku_
 
 ### License
 

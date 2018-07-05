@@ -1,11 +1,8 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.format.Formatter;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
@@ -13,9 +10,6 @@ import com.bumptech.glide.request.RequestOptions;
 import com.epicodus.samuelgespass.remoteclassroomopentok.Constants;
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
 import com.epicodus.samuelgespass.remoteclassroomopentok.util.OnSessionCreated;
-import com.opentok.OpenTok;
-import com.opentok.Role;
-import com.opentok.TokenOptions;
 import com.opentok.android.Connection;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
@@ -25,7 +19,9 @@ import com.opentok.android.Subscriber;
 import com.opentok.android.OpentokError;
 import android.support.annotation.NonNull;
 import android.Manifest;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -50,7 +46,7 @@ import org.json.JSONObject;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener, OnSessionCreated {
+public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener, OnSessionCreated, View.OnTouchListener {
 
     private static String API_KEY = Constants.API_KEY;
     private static String API_SECRET = Constants.API_SECRET;
@@ -75,6 +71,12 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private ImageButton mDisconnect;
     private EditText mSessionIdText;
     private Spinner mSelectActivitySpinner;
+    private View mSeparator;
+    private float downY;
+    private float moveY;
+    private float lastMoveY;
+    private int upBound;
+    private int downBound;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
@@ -88,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     public void connectToSession(String arg) throws OpenTokException {
         final String sessionId = arg;
         RequestQueue reqQueue = Volley.newRequestQueue(this);
-        String url = "https://server-iwmajgvwxy.now.sh/token/" + sessionId;
+        String url = "https://server-kzjldzvqns.now.sh/token/" + sessionId;
         Log.e(LOG_TAG, url);
         reqQueue.add(new JsonObjectRequest(Request.Method.GET,
                 url,
@@ -121,25 +123,20 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     public void fetchSessionConnectionData() {
         RequestQueue reqQueue = Volley.newRequestQueue(this);
         reqQueue.add(new JsonObjectRequest(Request.Method.GET,
-                "https://remote-classroom-open-tok.herokuapp.com" + "/session",
+                "https://server-kzjldzvqns.now.sh" + "/session",
                 null, new Response.Listener<JSONObject>() {
 
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    API_KEY = response.getString("apiKey");
                     sessionId = response.getString("sessionId");
-                    token = response.getString("token");
-
-                    Log.i(LOG_TAG, "API_KEY: " + API_KEY);
-                    Log.i(LOG_TAG, "SESSION_ID: " + sessionId);
-                    Log.i(LOG_TAG, "TOKEN: " + token);
-
-                    mSession = new Session.Builder(MainActivity.this, API_KEY, sessionId).build();
-                    mSession.setSessionListener(MainActivity.this);
-                    mSession.connect(token);
                     mSessionIdText.setText(sessionId);
 
+                    try {
+                        connectToSession(sessionId);
+                    } catch (OpenTokException ex) {
+                        Log.e(LOG_TAG, "OpenTokException" + ex.getMessage());
+                    }
                 } catch (JSONException error) {
                     Log.e(LOG_TAG, "Web Service error: " + error.getMessage());
                 }
@@ -194,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mFragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
             mVideoFrame = (FrameLayout) findViewById(R.id.videoFrame);
             mSessionIdText = (EditText) findViewById(R.id.session_id_text);
+            mSeparator = (View) findViewById(R.id.separator);
 
             Glide.with(this)
                     .load(getImage("flip"))
@@ -228,6 +226,31 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         }
     }
 
+    private void requestParentDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        final ViewParent parent = (ViewParent) getParent();
+        if (parent != null) {
+            parent.requestDisallowInterceptTouchEvent(disallowIntercept);
+        }
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent event) {
+//        if (view == mSeparator && event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+//            downY = event.getRawY();
+//            lastMoveY = downY;
+//            requestParentDisallowInterceptTouchEvent(true);
+//        }
+
+        if (view == mSeparator && event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+            moveY = event.getRawY();
+            int scrollDy = (int) (lastMoveY - moveY);
+            float yDiff = Math.abs(moveY - downY);
+            lastMoveY = moveY;
+
+        }
+        return super.onTouchEvent(event);
+    }
+
     @Override
     public void onConnected(Session session) {
         Log.e(LOG_TAG, "Session Connected");
@@ -246,6 +269,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     public void onDisconnected(Session session) {
         Log.i(LOG_TAG, "Session Disconnected");
         isConnected = false;
+        mPublisherViewContainer.removeAllViews();
     }
 
     @Override
