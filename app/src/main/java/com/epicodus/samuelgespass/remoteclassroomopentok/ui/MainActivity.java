@@ -466,6 +466,9 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
                 mSession.sendSignal("Activity", "Memory Game");
                 Log.e(LOG_TAG, "Signal sent");
             }
+            if (parent.getItemAtPosition(pos).equals("No Activity")) {
+                mSession.sendSignal("Activity", "None");
+            }
         } else {
             Toast.makeText(getApplicationContext(), "Please connect to a session", Toast.LENGTH_LONG);
         }
@@ -481,6 +484,10 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
                 android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentContainer, memoryGameFragment);
                 fragmentTransaction.commit();
+            }
+
+            if (data.equals("None")) {
+                mFragmentContainer.removeAllViews();
             }
         }
     }
