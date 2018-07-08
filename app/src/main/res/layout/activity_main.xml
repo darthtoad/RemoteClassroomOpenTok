@@ -9,8 +9,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="80"
+        android:layout_height="500dp"
         android:id="@+id/videoFrame">
 
         <Button
@@ -52,6 +51,22 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="150dp"
             android:text="Make Activity\nsmaller" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/toggle_audio"
+            android:layout_marginLeft="150dp"
+            android:layout_marginTop="60dp"
+            android:elevation="3dp"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="300dp"
+            android:layout_marginTop="60dp"
+            android:id="@+id/toggle_video"
+            android:elevation="3dp"/>
 
         <Spinner
             android:layout_width="wrap_content"
@@ -105,13 +120,12 @@
 
     <View android:background="@color/colorAccent"
         android:layout_width="wrap_content"
-        android:layout_height="2dp"
+        android:layout_height="25dp"
         android:id="@+id/separator"/>
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="20"
+        android:layout_height="200dp"
         android:id="@+id/fragmentContainer"
         android:layout_below="@id/videoFrame">
 

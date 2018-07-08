@@ -1,8 +1,11 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
+import android.content.ClipData;
 import android.content.SharedPreferences;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
@@ -19,8 +22,10 @@ import com.opentok.android.Subscriber;
 import com.opentok.android.OpentokError;
 import android.support.annotation.NonNull;
 import android.Manifest;
+import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -46,7 +51,7 @@ import org.json.JSONObject;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener, OnSessionCreated, View.OnTouchListener {
+public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener, OnSessionCreated {
 
     private static String API_KEY = Constants.API_KEY;
     private static String API_SECRET = Constants.API_SECRET;
@@ -67,6 +72,8 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private Button mButtonLargeFragment;
     private Button mButtonSmallFragment;
     private Button mCreateSession;
+    private ImageButton mToggleAudio;
+    private ImageButton mToggleVideo;
     private ImageButton mJoinSession;
     private ImageButton mDisconnect;
     private EditText mSessionIdText;
@@ -77,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private float lastMoveY;
     private int upBound;
     private int downBound;
+    private int windowHeight;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
@@ -155,6 +163,10 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        windowHeight = displayMetrics.heightPixels;
+
         mSelectActivitySpinner = (Spinner) findViewById(R.id.activity_select_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.select_activity_array, android.R.layout.simple_spinner_dropdown_item);
         mSelectActivitySpinner.setAdapter(adapter);
@@ -192,6 +204,16 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mVideoFrame = (FrameLayout) findViewById(R.id.videoFrame);
             mSessionIdText = (EditText) findViewById(R.id.session_id_text);
             mSeparator = (View) findViewById(R.id.separator);
+            mToggleAudio = (ImageButton) findViewById(R.id.toggle_audio);
+            mToggleVideo = (ImageButton) findViewById(R.id.toggle_video);
+
+            ViewGroup.LayoutParams fragmentParams = mFragmentContainer.getLayoutParams();
+            ViewGroup.LayoutParams videoParams = mVideoFrame.getLayoutParams();
+            fragmentParams.height = windowHeight / 2;
+            videoParams.height = windowHeight / 2;
+
+            mFragmentContainer.setLayoutParams(fragmentParams);
+            mVideoFrame.setLayoutParams(videoParams);
 
             Glide.with(this)
                     .load(getImage("flip"))
@@ -208,12 +230,47 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
                     .apply(new RequestOptions().override(50, 50))
                     .into(mJoinSession);
 
+            Glide.with(this)
+                    .load(getImage("audioon"))
+                    .apply(new RequestOptions().override(50, 50))
+                    .into(mToggleAudio);
+
+            Glide.with(this)
+                    .load(getImage("videoon"))
+                    .apply(new RequestOptions().override(50, 50))
+                    .into(mToggleVideo);
+
+
             mFlipScreen.setOnClickListener(this);
             mButtonSmallFragment.setOnClickListener(this);
             mButtonLargeFragment.setOnClickListener(this);
             mCreateSession.setOnClickListener(this);
             mJoinSession.setOnClickListener(this);
             mDisconnect.setOnClickListener(this);
+
+//            mSeparator.setOnTouchListener(new View.OnTouchListener() {
+//                @Override
+//                public boolean onTouch(View v, MotionEvent event) {
+//                    float y = event.getRawY();
+//
+//                    switch (event.getAction()) {
+//                        case MotionEvent.ACTION_DOWN:
+//                            break;
+//
+//                        case MotionEvent.ACTION_MOVE:
+//                            rebuildView(event.getRawY());
+//                            break;
+//
+//                        case MotionEvent.ACTION_UP:
+//                            rebuildView(event.getRawY());
+//                            break;
+//
+//                        case MotionEvent.ACTION_CANCEL:
+//                            break;
+//                    }
+//                    return true;
+//                }
+//            });
 
 
             Log.i(LOG_TAG, "requestPermissions success");
@@ -234,24 +291,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     }
 
     @Override
-    public boolean onTouch(View view, MotionEvent event) {
-//        if (view == mSeparator && event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-//            downY = event.getRawY();
-//            lastMoveY = downY;
-//            requestParentDisallowInterceptTouchEvent(true);
-//        }
-
-        if (view == mSeparator && event.getActionMasked() == MotionEvent.ACTION_MOVE) {
-            moveY = event.getRawY();
-            int scrollDy = (int) (lastMoveY - moveY);
-            float yDiff = Math.abs(moveY - downY);
-            lastMoveY = moveY;
-
-        }
-        return super.onTouchEvent(event);
-    }
-
-    @Override
     public void onConnected(Session session) {
         Log.e(LOG_TAG, "Session Connected");
         isConnected = true;
@@ -263,6 +302,8 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
         mPublisherViewContainer.addView(mPublisher.getView());
         mSession.publish(mPublisher);
+        mToggleVideo.setOnClickListener(this);
+        mToggleAudio.setOnClickListener(this);
     }
 
     @Override
@@ -270,6 +311,17 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         Log.i(LOG_TAG, "Session Disconnected");
         isConnected = false;
         mPublisherViewContainer.removeAllViews();
+        mToggleVideo.setOnClickListener(null);
+        mToggleAudio.setOnClickListener(null);
+        Glide.with(this)
+                .load(getImage("audioon"))
+                .apply(new RequestOptions().override(50, 50))
+                .into(mToggleAudio);
+
+        Glide.with(this)
+                .load(getImage("videoon"))
+                .apply(new RequestOptions().override(50, 50))
+                .into(mToggleVideo);
     }
 
     @Override
@@ -314,6 +366,43 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
     @Override
     public void onClick(View view) {
+        if (view == mToggleAudio) {
+            Stream stream = mPublisher.getStream();
+            if (stream.hasAudio() == true) {
+                mPublisher.setPublishAudio(false);
+                Glide.with(this)
+                        .load(getImage("audiooff"))
+                        .apply(new RequestOptions().override(50, 50))
+                        .into(mToggleAudio);
+            } else {
+                mPublisher.setPublishAudio(true);
+                Glide.with(this)
+                        .load(getImage("audioon"))
+                        .apply(new RequestOptions().override(50, 50))
+                        .into(mToggleAudio);
+            }
+        }
+
+        if (view == mToggleVideo) {
+            Stream stream = mPublisher.getStream();
+            if (stream.hasVideo() == true) {
+                mPublisher.setPublishVideo(false);
+                mPublisherViewContainer.removeAllViews();
+                Glide.with(this)
+                        .load(getImage("videooff"))
+                        .apply(new RequestOptions().override(50, 50))
+                        .into(mToggleVideo);
+            } else {
+                mPublisher.setPublishVideo(true);
+                mPublisherViewContainer.addView(mPublisher.getView());
+                Glide.with(this)
+                        .load(getImage("videoon"))
+                        .apply(new RequestOptions().override(50, 50))
+                        .into(mToggleVideo);
+
+            }
+        }
+
         if (view == mCreateSession) {
             fetchSessionConnectionData();
             Log.i(LOG_TAG, "Session ID: " + sessionId);
