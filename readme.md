@@ -31,10 +31,7 @@ _This app is geared towards teaching foreign languages on a smartphone. One of t
 * Differentiate between students and teachers
 * Create website so teachers can make activities
 * Add more activities
-* Empty bottom frame when "No Activities" is selected
 * Improve layouts by implementing RecyclerViews
-* Allow users to toggle audio/video
-
 
 ## Setup/Installation Requirements
 

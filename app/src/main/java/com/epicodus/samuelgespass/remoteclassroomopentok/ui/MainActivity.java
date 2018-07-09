@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import android.Manifest;
 import android.view.DragEvent;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -51,7 +52,9 @@ import org.json.JSONObject;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener, OnSessionCreated {
+import static android.view.MotionEvent.INVALID_POINTER_ID;
+
+public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener, OnSessionCreated, View.OnTouchListener {
 
     private static String API_KEY = Constants.API_KEY;
     private static String API_SECRET = Constants.API_SECRET;
@@ -79,12 +82,12 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private EditText mSessionIdText;
     private Spinner mSelectActivitySpinner;
     private View mSeparator;
-    private float downY;
-    private float moveY;
-    private float lastMoveY;
+    private float mPosY;
+    private float mLastTouchY;
     private int upBound;
     private int downBound;
     private int windowHeight;
+    private int mActivePointerId = INVALID_POINTER_ID;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
@@ -247,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mCreateSession.setOnClickListener(this);
             mJoinSession.setOnClickListener(this);
             mDisconnect.setOnClickListener(this);
+            mSeparator.setOnTouchListener(this);
 
 //            mSeparator.setOnTouchListener(new View.OnTouchListener() {
 //                @Override
@@ -362,6 +366,87 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     @Override
     public void onError(Session session, OpentokError opentokError) {
         Log.e(LOG_TAG, "Session error: " + opentokError.getMessage());
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent event) {
+        if (view == mSeparator) {
+            Log.e(LOG_TAG, "onTouch: ");
+            final int action = MotionEventCompat.getActionMasked(event);
+            switch (action) {
+                case MotionEvent.ACTION_DOWN: {
+                    Log.e(LOG_TAG, "ACTION_DOWN");
+                    final int pointerIndex = MotionEventCompat.getActionIndex(event);
+                    final float y = MotionEventCompat.getY(event, pointerIndex);
+
+                    // Remember where we started (for dragging)
+                    mLastTouchY = y;
+                    // Save the ID of this pointer (for dragging)
+                    mActivePointerId = MotionEventCompat.getPointerId(event, 0);
+                    break;
+                }
+
+                case MotionEvent.ACTION_MOVE: {
+                    Log.e(LOG_TAG, "ACTION_MOVE");
+
+                    // Find the index of the active pointer and fetch its position
+                    final int pointerIndex =
+                            MotionEventCompat.findPointerIndex(event, mActivePointerId);
+
+                    final float y = MotionEventCompat.getY(event, pointerIndex);
+
+                    // Calculate the distance moved
+                    final float dy = y - mLastTouchY;
+
+                    mPosY += dy;
+
+                    int yInt = Math.round(dy);
+
+                    ViewGroup.LayoutParams fragmentParams = mFragmentContainer.getLayoutParams();
+                    ViewGroup.LayoutParams videoParams = mVideoFrame.getLayoutParams();
+                    fragmentParams.height -= yInt;
+                    videoParams.height += yInt;
+
+                    mFragmentContainer.setLayoutParams(fragmentParams);
+                    mVideoFrame.setLayoutParams(videoParams);
+//                    invalidate();
+
+                    // Remember this touch position for the next move event
+                    mLastTouchY = y;
+
+                    break;
+                }
+
+                case MotionEvent.ACTION_UP: {
+                    Log.e(LOG_TAG, "ACTION_UP");
+                    mActivePointerId = INVALID_POINTER_ID;
+                    break;
+                }
+
+                case MotionEvent.ACTION_CANCEL: {
+                    Log.e(LOG_TAG, "ACTION_CANCEL");
+                    mActivePointerId = INVALID_POINTER_ID;
+                    break;
+                }
+
+                case MotionEvent.ACTION_POINTER_UP: {
+                    Log.e(LOG_TAG, "ACTION_POINTER_UP");
+
+                    final int pointerIndex = MotionEventCompat.getActionIndex(event);
+                    final int pointerId = MotionEventCompat.getPointerId(event, pointerIndex);
+
+                    if (pointerId == mActivePointerId) {
+                        // This was our active pointer going up. Choose a new
+                        // active pointer and adjust accordingly.
+                        final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+                        mLastTouchY = MotionEventCompat.getY(event, newPointerIndex);
+                        mActivePointerId = MotionEventCompat.getPointerId(event, newPointerIndex);
+                    }
+                    break;
+                }
+            }
+        }
+        return true;
     }
 
     @Override
