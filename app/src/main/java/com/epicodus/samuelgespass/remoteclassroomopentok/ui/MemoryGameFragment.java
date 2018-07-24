@@ -4,6 +4,7 @@ package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -17,6 +18,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
@@ -30,8 +37,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.opentok.android.Connection;
+import com.opentok.android.OpentokError;
 import com.opentok.android.Session;
+import com.opentok.android.Stream;
+import com.opentok.exception.OpenTokException;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,31 +54,108 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import static com.epicodus.samuelgespass.remoteclassroomopentok.Constants.API_KEY;
+
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MemoryGameFragment extends Fragment {
-//    private TextView textViewRunning;
-//    private TextView textViewSleeping;
-//    private TextView textViewEating;
-//    private ImageButton imageButtonRunning;
-//    private ImageButton imageButtonSleeping;
-//    private ImageButton imageButtonEating;
-//    private boolean isImageButtonRunningFlipped = false;
-//    private boolean isImageButtonSleepingFlipped = false;
-//    private boolean isImageButtonEatingFlipped = false;
+public class MemoryGameFragment extends Fragment implements Session.SessionListener, Session.SignalListener {
     private boolean turnTaken = false;
     private Integer keyFlipped;
-//    private boolean isRunningMatched = false;
-//    private boolean isSleepingMatched = false;
-//    private boolean isEatingMatched = false;
     String wordListName;
+    String sessionId;
+    String token;
     ArrayList<Integer> foundMatches = new ArrayList<>();
     private Session mSession;
     private OnSessionCreated mOnSessionCreated;
     private TextView title;
     private LinearLayout wordListView;
     private LinearLayout imageListView;
+
+    public void textFlippedTurnNotTaken(TextView newWordTextView, final Map.Entry<Integer, String> entry, int arrLength) {
+        newWordTextView.setText(entry.getValue());
+        keyFlipped = entry.getKey();
+        for (int i = 0; i < arrLength; i++) {
+            TextView currentTextView = getView().findViewWithTag("Text " + Integer.toString(i));
+            currentTextView.setClickable(false);
+        }
+        turnTaken = true;
+    }
+
+    public void textFlippedNoMatch(int arrLength) {
+        resetClickables(arrLength);
+        Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
+        turnTaken = false;
+    }
+
+    public void textFlippedMatch(final Map.Entry<Integer, String> entry, TextView newWordTextView, int arrLength) {
+        foundMatches.add(entry.getKey());
+        newWordTextView.setText(entry.getValue());
+        Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
+        resetClickables(arrLength);
+        turnTaken = false;
+    }
+
+    public void imageFlippedTurnNotTaken(final Map.Entry<Integer, String> entry, ImageButton newImage, int arrLength) {
+        Picasso.get()
+                .load(entry.getValue())
+                .resize(275, 183)
+                .centerInside()
+                .into(newImage);
+        for (int i = 0; i < arrLength; i++) {
+            ImageButton currentImage = getView().findViewWithTag("Image " + Integer.toString(i));
+            currentImage.setClickable(false);
+        }
+        keyFlipped = entry.getKey();
+        turnTaken = true;
+    }
+
+    public void imageFlippedNoMatch(int arrLength) {
+        resetClickables(arrLength);
+        Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
+        turnTaken = false;
+    }
+
+    public void imageFlippedMatch(final Map.Entry<Integer, String> entry, ImageButton newImage, int arrLength) {
+        foundMatches.add(entry.getKey());
+        Picasso.get()
+                .load(entry.getValue())
+                .resize(275, 183)
+                .centerInside()
+                .into(newImage);
+        Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
+        resetClickables(arrLength);
+        turnTaken = false;
+    }
+
+    public void connectToSession(String arg) throws OpenTokException {
+        final String sessionId = arg;
+        RequestQueue reqQueue = Volley.newRequestQueue(getContext());
+        String url = "https://server-kzjldzvqns.now.sh/token/" + sessionId;
+        reqQueue.add(new JsonObjectRequest(Request.Method.GET,
+                url,
+                null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    token = response.getString("token");
+
+                    mSession = new Session.Builder(getContext(), API_KEY, sessionId).build();
+                    mSession.setSessionListener(MemoryGameFragment.this);
+                    mSession.connect(token);
+
+                } catch (JSONException error) {
+                    Log.e("error", error.getMessage());
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("error", error.getMessage());
+            }
+        }));
+    }
 
     public void resetClickables(int arrLength) {
         for (int i = 0; i < arrLength; i++) {
@@ -152,24 +243,30 @@ public class MemoryGameFragment extends Fragment {
                                 @Override
                                 public void onClick(View v) {
                                     if (!turnTaken) {
-                                        newWordTextView.setText(entry.getValue());
-                                        keyFlipped = entry.getKey();
-                                        for (int i = 0; i < arrLength; i++) {
-                                            TextView currentTextView = getView().findViewWithTag("Text " + Integer.toString(i));
-                                            currentTextView.setClickable(false);
-                                        }
-                                        turnTaken = true;
+                                        textFlippedTurnNotTaken(newWordTextView, entry, arrLength);
+                                        //TextView clicked, turn not taken
+//                                        newWordTextView.setText(entry.getValue());
+//                                        keyFlipped = entry.getKey();
+//                                        for (int i = 0; i < arrLength; i++) {
+//                                            TextView currentTextView = getView().findViewWithTag("Text " + Integer.toString(i));
+//                                            currentTextView.setClickable(false);
+//                                        }
+//                                        turnTaken = true;
                                     } else {
                                         if (entry.getKey() == keyFlipped) {
-                                            foundMatches.add(entry.getKey());
-                                            newWordTextView.setText(entry.getValue());
-                                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-                                            resetClickables(arrLength);
+                                            //TextView clicked, turn taken, match
+//                                            foundMatches.add(entry.getKey());
+//                                            newWordTextView.setText(entry.getValue());
+//                                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
+//                                            resetClickables(arrLength);
+                                            textFlippedMatch(entry, newWordTextView, arrLength);
                                         } else {
-                                            resetClickables(arrLength);
-                                            Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
+                                            //TextView clicked, turn taken, no match
+                                            textFlippedNoMatch(arrLength);
+//                                            resetClickables(arrLength);
+//                                            Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
                                         }
-                                        turnTaken = false;
+//                                        turnTaken = false;
                                     }
                                 }
                             });
@@ -202,33 +299,38 @@ public class MemoryGameFragment extends Fragment {
                                 @Override
                                 public void onClick(View v) {
                                     if (!turnTaken) {
-                                        Picasso.get()
-                                                .load(entry.getValue())
-                                                .resize(275, 183)
-                                                .centerInside()
-                                                .into(newImage);
-                                        for (int i = 0; i < arrLength; i++) {
-                                            ImageButton currentImage = getView().findViewWithTag("Image " + Integer.toString(i));
-                                            currentImage.setClickable(false);
-                                        }
-                                        keyFlipped = entry.getKey();
-                                        turnTaken = true;
+                                        imageFlippedTurnNotTaken(entry, newImage, arrLength);
+                                        //ImageButton clicked, turn not taken
+//                                        Picasso.get()
+//                                                .load(entry.getValue())
+//                                                .resize(275, 183)
+//                                                .centerInside()
+//                                                .into(newImage);
+//                                        for (int i = 0; i < arrLength; i++) {
+//                                            ImageButton currentImage = getView().findViewWithTag("Image " + Integer.toString(i));
+//                                            currentImage.setClickable(false);
+//                                        }
+//                                        keyFlipped = entry.getKey();
+//                                        turnTaken = true;
                                     } else {
                                         if (entry.getKey() == keyFlipped) {
-                                            foundMatches.add(entry.getKey());
-                                            Picasso.get()
-                                                    .load(entry.getValue())
-                                                    .resize(275, 183)
-                                                    .centerInside()
-                                                    .into(newImage);
-                                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-                                            resetClickables(arrLength);
+                                            imageFlippedMatch(entry, newImage, arrLength);
+                                            //imageButtonFlipped, turn taken, match
+//                                            foundMatches.add(entry.getKey());
+//                                            Picasso.get()
+//                                                    .load(entry.getValue())
+//                                                    .resize(275, 183)
+//                                                    .centerInside()
+//                                                    .into(newImage);
+//                                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
+//                                            resetClickables(arrLength);
                                         } else {
-                                            TextView text = getView().findViewWithTag("Text " + Integer.toString(keyFlipped));
-                                            resetClickables(arrLength);
-                                            Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
+                                            imageFlippedNoMatch(arrLength);
+                                            //imageButtonFlipped, turn taken, no match
+//                                            resetClickables(arrLength);
+//                                            Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
                                         }
-                                        turnTaken = false;
+//                                        turnTaken = false;
                                     }
                                 }
                             });
@@ -262,10 +364,11 @@ public class MemoryGameFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static MemoryGameFragment newInstance(String wordListNameLocal) {
+    public static MemoryGameFragment newInstance(String wordListNameLocal, String sessionId) {
         MemoryGameFragment memoryGameFragment = new MemoryGameFragment();
         Bundle args = new Bundle();
         args.putString("Word List Name", wordListNameLocal);
+        args.putString("sessionId", sessionId);
         memoryGameFragment.setArguments(args);
         return memoryGameFragment;
     }
@@ -278,9 +381,44 @@ public class MemoryGameFragment extends Fragment {
     }
 
     @Override
+    public void onConnected(Session session) {
+        mSession = session;
+        mSession.setSignalListener(this);
+        getLists();
+    }
+
+    @Override
+    public void onDisconnected(Session session) {
+        Log.e("Memory Game", "Disconnected");
+    }
+
+    @Override
+    public void onError(Session session, OpentokError opentokError) {
+        Log.e("Session error", opentokError.getMessage());
+    }
+
+    @Override
+    public void onStreamDropped(Session session, Stream stream) {
+        Log.e("Memory Game", "Stream Dropped");
+    }
+
+    @Override
+    public void onStreamReceived(Session session, Stream stream) {
+        Log.e("Memory Game", "Stream Receieved");
+    }
+
+    @Override
+    public void onSignalReceived(Session session, String type, String data, Connection connection) {
+        if (type == "Memory Game") {
+
+        }
+    }
+
+        @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         wordListName = getArguments().getString("Word List Name");
+        sessionId = getArguments().getString("sessionId");
     }
 
     @Override
@@ -305,6 +443,11 @@ public class MemoryGameFragment extends Fragment {
         title.setText(wordListName);
         wordListView = (LinearLayout) view.findViewById(R.id.wordListView);
         imageListView = (LinearLayout) view.findViewById(R.id.imageListView);
+        try {
+            connectToSession(sessionId);
+        } catch (OpenTokException ex) {
+            Log.e("Error", ex.getMessage());
+        }
 //        DisplayMetrics displayMetrics = new DisplayMetrics();
 //        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 //        int windowWidth = displayMetrics.widthPixels;
@@ -313,48 +456,8 @@ public class MemoryGameFragment extends Fragment {
 //        imageListView.setLayoutParams(new RelativeLayout.LayoutParams(windowWidth / 2, ViewGroup.LayoutParams.WRAP_CONTENT));
 
 
-        getLists();
-
-
-
-//        textViewEating = (TextView) view.findViewById(R.id.textView_eating);
-//        textViewRunning = (TextView) view.findViewById(R.id.textView_running);
-//        textViewSleeping = (TextView) view.findViewById(R.id.textView_sleeping);
-//
-//        imageButtonEating = (ImageButton) view.findViewById(R.id.imageButton_eating);
-//        imageButtonRunning = (ImageButton) view.findViewById(R.id.imageButton_running);
-//        imageButtonSleeping = (ImageButton) view.findViewById(R.id.imageButton_sleeping);
-//
-//        Glide.with(this).load(getImage("card")).into(imageButtonEating);
-//        Glide.with(this).load(getImage("card")).into(imageButtonRunning);
-//        Glide.with(this).load(getImage("card")).into(imageButtonSleeping);
-//
-//        textViewEating.setOnClickListener(this);
-//        textViewSleeping.setOnClickListener(this);
-//        textViewRunning.setOnClickListener(this);
-//
-//        imageButtonSleeping.setOnClickListener(this);
-//        imageButtonRunning.setOnClickListener(this);
-//        imageButtonEating.setOnClickListener(this);
 
         return view;
-    }
-
-    private void resetViews() {
-//        if (!isRunningMatched) {
-//            textViewRunning.setText("");
-//            Glide.with(this).load(getImage("card")).into(imageButtonRunning);
-//        }
-//
-//        if (!isEatingMatched) {
-//            textViewEating.setText("");
-//            Glide.with(this).load(getImage("card")).into(imageButtonEating);
-//        }
-//
-//        if (!isSleepingMatched) {
-//            textViewSleeping.setText("");
-//            Glide.with(this).load(getImage("card")).into(imageButtonSleeping);
-//        }
     }
 
 }

@@ -256,7 +256,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
         mSignOut = (Button) findViewById(R.id.signOut);
         mSignOut.setOnClickListener(this);
-
         requestPermissions();
     }
 
@@ -630,7 +629,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             if (data.equals("Memory Game")) {
                 String wordListName = (String) mSelectWordListSpinner.getSelectedItem();
                 Log.e("List Name", wordListName);
-                MemoryGameFragment memoryGameFragment = MemoryGameFragment.newInstance(wordListName);
+                MemoryGameFragment memoryGameFragment = MemoryGameFragment.newInstance(wordListName, sessionId);
                 Log.e("Selected", "onItemSelected: ");
                 android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentContainer, memoryGameFragment);
