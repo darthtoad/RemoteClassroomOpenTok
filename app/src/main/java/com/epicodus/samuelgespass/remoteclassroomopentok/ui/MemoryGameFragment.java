@@ -2,14 +2,18 @@ package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +31,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.opentok.android.Session;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -113,10 +118,15 @@ public class MemoryGameFragment extends Fragment {
                         Collections.shuffle(wordList);
 
                         for (final Map.Entry<Integer, String> entry : wordList) {
-                            final TextView newWordTextView = new TextView(getContext());
-                            newWordTextView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                            newWordTextView.setTextSize(12);
+                            final TextView newWordTextView = new TextView(getActivity().getApplicationContext());
+                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                            params.setMargins(10, 0, 0, 20);
+                            newWordTextView.setLayoutParams(params);
+                            newWordTextView.setTextSize(20);
                             newWordTextView.setBottom(5);
+                            newWordTextView.setTextColor(Color.parseColor("#ff0000"));
+                            newWordTextView.setBackgroundColor(Color.parseColor("#000000"));
+                            newWordTextView.setText("Click To See Word");
                             wordListView.addView(newWordTextView);
                             newWordTextView.setTag("Text " + Integer.toString(entry.getKey()));
                             newWordTextView.setOnClickListener(new View.OnClickListener() {
@@ -126,19 +136,21 @@ public class MemoryGameFragment extends Fragment {
                                         newWordTextView.setText(entry.getValue());
                                         keyFlipped = entry.getKey();
                                         newWordTextView.setClickable(false);
+                                        wordListView.setClickable(false);
                                         turnTaken = true;
                                     } else {
                                         if (entry.getKey() == keyFlipped) {
                                             newWordTextView.setText(entry.getValue());
                                             Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
+                                            imageListView.setClickable(true);
                                             newWordTextView.setClickable(false);
                                         } else {
                                             ImageButton image = getView().findViewWithTag("Image " + Integer.toString(keyFlipped));
-                                            Glide.with(getContext())
+                                            Picasso.get()
                                                     .load(getImage("card"))
-                                                    .apply(new RequestOptions().override(Target.SIZE_ORIGINAL).diskCacheStrategy(DiskCacheStrategy.ALL))
                                                     .into(image);
                                             image.setClickable(true);
+                                            imageListView.setClickable(true);
                                             Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
                                         }
                                         turnTaken = false;
@@ -166,33 +178,37 @@ public class MemoryGameFragment extends Fragment {
                             final ImageButton newImage = new ImageButton(getContext());
                             newImage.setBottom(5);
                             imageListView.addView(newImage);
-                            Glide.with(getView())
+                            Picasso.get()
                                     .load(getImage("card"))
-                                    .apply(new RequestOptions().override(Target.SIZE_ORIGINAL))
                                     .into(newImage);
                             newImage.setTag("Image " + Integer.toString(entry.getKey()));
                             newImage.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     if (!turnTaken) {
-                                        Glide.with(getContext())
+                                        Picasso.get()
                                                 .load(entry.getValue())
-                                                .apply(new RequestOptions().override(100, 100))
+                                                .resize(275, 183)
+                                                .centerInside()
                                                 .into(newImage);
                                         newImage.setClickable(false);
+                                        imageListView.setClickable(false);
                                         keyFlipped = entry.getKey();
                                         turnTaken = true;
                                     } else {
                                         if (entry.getKey() == keyFlipped) {
-                                            Glide.with(getContext())
+                                            Picasso.get()
                                                     .load(entry.getValue())
-                                                    .apply(new RequestOptions().override(100, 100))
+                                                    .resize(275, 183)
+                                                    .centerInside()
                                                     .into(newImage);
                                             Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
                                             newImage.setClickable(false);
+                                            wordListView.setClickable(true);
                                         } else {
                                             TextView text = getView().findViewWithTag("Text " + Integer.toString(keyFlipped));
                                             text.setClickable(true);
+                                            wordListView.setClickable(true);
                                             Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
                                         }
                                         turnTaken = false;
@@ -272,6 +288,12 @@ public class MemoryGameFragment extends Fragment {
         title.setText(wordListName);
         wordListView = (LinearLayout) view.findViewById(R.id.wordListView);
         imageListView = (LinearLayout) view.findViewById(R.id.imageListView);
+//        DisplayMetrics displayMetrics = new DisplayMetrics();
+//        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+//        int windowWidth = displayMetrics.widthPixels;
+//
+//        wordListView.setLayoutParams(new RelativeLayout.LayoutParams(windowWidth / 2, ViewGroup.LayoutParams.WRAP_CONTENT));
+//        imageListView.setLayoutParams(new RelativeLayout.LayoutParams(windowWidth / 2, ViewGroup.LayoutParams.WRAP_CONTENT));
 
 
         getLists();
