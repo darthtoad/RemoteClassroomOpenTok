@@ -29,6 +29,16 @@
             android:elevation="3dp"
             />
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/signOut"
+            android:text="Sign Out"
+            android:layout_marginTop="240dp"
+            android:layout_marginLeft="5dp"
+            android:elevation="3dp"
+            />
+
         <ImageButton
             android:id="@+id/button_toggle_screen"
             android:layout_width="wrap_content"
@@ -76,6 +86,16 @@
             android:layout_marginLeft="5dp"
             android:background="@color/colorAccent"
             android:elevation="3dp"
+            />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/word_list_select_spinner"
+            android:layout_gravity="top|right"
+            android:layout_marginRight="150dp"
+            android:elevation="3dp"
+            android:background="@color/colorAccent"
             />
 
         <EditText

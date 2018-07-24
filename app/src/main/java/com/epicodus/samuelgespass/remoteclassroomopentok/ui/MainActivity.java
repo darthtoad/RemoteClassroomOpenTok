@@ -1,6 +1,8 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
+import com.epicodus.samuelgespass.remoteclassroomopentok.models.WordList;
 
 import android.content.ClipData;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +15,14 @@ import com.bumptech.glide.request.RequestOptions;
 import com.epicodus.samuelgespass.remoteclassroomopentok.Constants;
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
 import com.epicodus.samuelgespass.remoteclassroomopentok.util.OnSessionCreated;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.opentok.android.Connection;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
@@ -75,12 +85,14 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private Button mButtonLargeFragment;
     private Button mButtonSmallFragment;
     private Button mCreateSession;
+    private Button mSignOut;
     private ImageButton mToggleAudio;
     private ImageButton mToggleVideo;
     private ImageButton mJoinSession;
     private ImageButton mDisconnect;
     private EditText mSessionIdText;
     private Spinner mSelectActivitySpinner;
+    private Spinner mSelectWordListSpinner;
     private View mSeparator;
     private float mPosY;
     private float mLastTouchY;
@@ -88,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private int downBound;
     private int windowHeight;
     private int mActivePointerId = INVALID_POINTER_ID;
+    private Bundle activityBundle;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
@@ -96,6 +109,72 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         int drawableResourceId = this.getResources().getIdentifier(imageName, "drawable", getApplicationContext().getPackageName());
 
         return drawableResourceId;
+    }
+
+    public void signOut() {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        auth.signOut();
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    public void getWordLists() {
+        Log.e(LOG_TAG, "getWordLists: " );
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
+        String userId = user.getUid();
+        Log.e("userId: ", userId);
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("users").child(userId);
+        Log.e(LOG_TAG, "getWordLists: " );
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.e(LOG_TAG, "onDataChange: ");
+                int listNameArrayLength = (int) dataSnapshot.getChildrenCount();
+                Log.e(LOG_TAG, "Arr length: " + Integer.toString(listNameArrayLength));
+                String[] listNames = new String[listNameArrayLength];
+                int listNameIndex = 0;
+
+                for (DataSnapshot keySnapshot : dataSnapshot.getChildren()) {
+                    Log.e("Snapshot: ", "snapped");
+                    String listName = keySnapshot.getKey();
+                    listNames[listNameIndex] = listName;
+//                    int listLength = (int) keySnapshot.child("urlList").getChildrenCount();
+//                    String[] urlList = new String[listLength];
+//                    String[] wordList = new String[listLength];
+//
+//                    for (DataSnapshot snapshot: keySnapshot.getChildren()) {
+//                        if (snapshot.getKey() == "urlList") {
+//                            int index = 0;
+//                            for (DataSnapshot currentUrlList: keySnapshot.getChildren()) {
+//                                Log.e(LOG_TAG, (String) currentUrlList.getValue());
+//                                urlList[index] = (String) currentUrlList.getValue();
+//                                index++;
+//                            }
+//                        }
+//                        if (snapshot.getKey() == "wordList") {
+//                            int index = 0;
+//                            for (DataSnapshot currentWordList : keySnapshot.getChildren()) {
+//                                Log.e(LOG_TAG, (String) currentWordList.getValue());
+//                                wordList[index] = (String) currentWordList.getValue();
+//                                index++;
+//                            }
+//                        }
+//                    }
+                    listNameIndex++;
+                }
+                ArrayAdapter<String> adapter =  new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, listNames);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                mSelectWordListSpinner.setAdapter(adapter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(LOG_TAG, databaseError.getMessage());
+            }
+        });
     }
 
     public void connectToSession(String arg) throws OpenTokException {
@@ -175,6 +254,9 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         mSelectActivitySpinner.setAdapter(adapter);
         mSelectActivitySpinner.setOnItemSelectedListener(this);
 
+        mSignOut = (Button) findViewById(R.id.signOut);
+        mSignOut.setOnClickListener(this);
+
         requestPermissions();
     }
 
@@ -209,6 +291,8 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mSeparator = (View) findViewById(R.id.separator);
             mToggleAudio = (ImageButton) findViewById(R.id.toggle_audio);
             mToggleVideo = (ImageButton) findViewById(R.id.toggle_video);
+            mSelectWordListSpinner = (Spinner) findViewById(R.id.word_list_select_spinner);
+            getWordLists();
 
             ViewGroup.LayoutParams fragmentParams = mFragmentContainer.getLayoutParams();
             ViewGroup.LayoutParams videoParams = mVideoFrame.getLayoutParams();
@@ -251,31 +335,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mJoinSession.setOnClickListener(this);
             mDisconnect.setOnClickListener(this);
             mSeparator.setOnTouchListener(this);
-
-//            mSeparator.setOnTouchListener(new View.OnTouchListener() {
-//                @Override
-//                public boolean onTouch(View v, MotionEvent event) {
-//                    float y = event.getRawY();
-//
-//                    switch (event.getAction()) {
-//                        case MotionEvent.ACTION_DOWN:
-//                            break;
-//
-//                        case MotionEvent.ACTION_MOVE:
-//                            rebuildView(event.getRawY());
-//                            break;
-//
-//                        case MotionEvent.ACTION_UP:
-//                            rebuildView(event.getRawY());
-//                            break;
-//
-//                        case MotionEvent.ACTION_CANCEL:
-//                            break;
-//                    }
-//                    return true;
-//                }
-//            });
-
+            mSelectWordListSpinner.setOnItemSelectedListener(this);
 
             Log.i(LOG_TAG, "requestPermissions success");
 
@@ -516,6 +576,10 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             Log.e("thing", "onClick: ");
         }
 
+        if (view == mSignOut) {
+            signOut();
+        }
+
         if (view == mButtonLargeFragment) {
             LinearLayout.LayoutParams paramsFragment = (LinearLayout.LayoutParams) mFragmentContainer.getLayoutParams();
             LinearLayout.LayoutParams paramsMain = (LinearLayout.LayoutParams) mVideoFrame.getLayoutParams();
@@ -564,7 +628,9 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         Log.e("signal recieved", "onSignalReceived: ");
         if (type != null && type.equals("Activity")) {
             if (data.equals("Memory Game")) {
-                MemoryGameFragment memoryGameFragment = MemoryGameFragment.newInstance();
+                String wordListName = (String) mSelectWordListSpinner.getSelectedItem();
+                Log.e("List Name", wordListName);
+                MemoryGameFragment memoryGameFragment = MemoryGameFragment.newInstance(wordListName);
                 Log.e("Selected", "onItemSelected: ");
                 android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentContainer, memoryGameFragment);

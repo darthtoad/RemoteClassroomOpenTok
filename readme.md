@@ -41,6 +41,7 @@ _This app is geared towards teaching foreign languages on a smartphone. One of t
 * Go to [TokBox](https://TokBox.com/). Create an account and start a project. Find your API key, create a SessionId, and generate a token.
 * Create a file in your root directory called "gradle.properties". This file should have the following content: org.gradle.jvmargs=-Xmx1536m  ApiKey = "API KEY HERE" ApiSecret = "API SECRET HERE"
 * Run project
+* For the teacher's website, see remote-classroom-open-tok-react
 
 ## Known Bugs
 
@@ -60,6 +61,9 @@ _This project currently has no known bugs. If you find any, please [message](mai
 * _Express.js_
 * _Babel_
 * _zeit.co_
+* _React_
+* _CSS_
+* _HTML5_
 
 ### License
 

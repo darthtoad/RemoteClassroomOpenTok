@@ -6,90 +6,43 @@
     tools:context="com.epicodus.samuelgespass.remoteclassroomopentok.ui.MemoryGameFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <android.support.constraint.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:id="@+id/textView-running"
-            android:layout_width="160dp"
-            android:layout_height="60dp"
-            android:background="@color/colorAccent"
-            android:text=""
-            android:textAlignment="center"
-            android:textColor="#000000"
-            android:textSize="40sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView-sleeping" />
-
-        <TextView
-            android:id="@+id/textView-sleeping"
-            android:layout_width="160dp"
-            android:layout_height="60dp"
-            android:background="#BAD"
-            android:textAlignment="center"
-            android:textSize="40sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/textView-eating"
-            android:layout_width="160dp"
-            android:layout_height="60dp"
-            android:background="#867530"
-            android:textAlignment="center"
-            android:textColor="#035768"
-            android:textSize="40sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView-running" />
-
-        <ImageButton
-            android:id="@+id/imageButton-running"
-            android:layout_width="148dp"
-            android:layout_height="123dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginTop="48dp"
-            android:scaleType="fitXY"
-            app:layout_constraintBottom_toTopOf="@+id/imageButton-sleeping"
-            android:contentDescription="Match the picture to the word"
-            app:layout_constraintEnd_toStartOf="@+id/imageButton-eating"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView-eating"
-            app:layout_constraintVertical_bias="0.0" />
-
-        <ImageButton
-            android:id="@+id/imageButton-eating"
-            android:layout_width="150dp"
-            android:layout_height="115dp"
-            android:layout_marginTop="16dp"
-            android:scaleType="fitXY"
-            android:contentDescription="Match the picture to the word"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.213"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageButton-running" />
-
-        <ImageButton
-            android:id="@+id/imageButton-sleeping"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:scaleType="fitXY"
-            android:contentDescription="Match the picture to the word"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/imageButton-eating"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.601" />
 
 
-    </android.support.constraint.ConstraintLayout>
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:id="@+id/title"
+                    android:textSize="20dp"
+                    android:text="Please Match the Words to the Picture"
+                    />
+
+                <ListView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/imageListView"
+                    android:layout_below="@+id/title"
+                    >
+
+                </ListView>
+
+                <ListView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/wordListView"
+                    android:layout_toRightOf="@+id/imageListView">
+
+                </ListView>
+
+            </RelativeLayout>
+
+        </ScrollView>
 
 </FrameLayout>
