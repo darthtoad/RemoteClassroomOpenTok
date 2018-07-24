@@ -59,11 +59,30 @@ public class MemoryGameFragment extends Fragment {
 //    private boolean isSleepingMatched = false;
 //    private boolean isEatingMatched = false;
     String wordListName;
+    ArrayList<Integer> foundMatches = new ArrayList<>();
     private Session mSession;
     private OnSessionCreated mOnSessionCreated;
     private TextView title;
     private LinearLayout wordListView;
     private LinearLayout imageListView;
+
+    public void resetClickables(int arrLength) {
+        for (int i = 0; i < arrLength; i++) {
+            TextView currentTextView = getView().findViewWithTag("Text " + Integer.toString(i));
+            ImageButton currentImage = getView().findViewWithTag("Image " + Integer.toString(i));
+            if (foundMatches.contains(i)) {
+                currentTextView.setClickable(false);
+                currentImage.setClickable(false);
+            } else {
+                currentTextView.setClickable(true);
+                currentImage.setClickable(true);
+                currentTextView.setText("Click to See Word");
+                Picasso.get()
+                        .load(getImage("card"))
+                        .into(currentImage);
+            }
+        }
+    }
 
     public void getLists() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -90,7 +109,7 @@ public class MemoryGameFragment extends Fragment {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         Log.e("Start", "onDataChange2: ");
-                        int arrLength = (int) dataSnapshot.getChildrenCount();
+                        final int arrLength = (int) dataSnapshot.getChildrenCount();
                         String[] urlArr = new String[arrLength];
                         Integer index = 0;
                         for (DataSnapshot urlSnapshot : dataSnapshot.getChildren()) {
@@ -135,22 +154,19 @@ public class MemoryGameFragment extends Fragment {
                                     if (!turnTaken) {
                                         newWordTextView.setText(entry.getValue());
                                         keyFlipped = entry.getKey();
-                                        newWordTextView.setClickable(false);
-                                        wordListView.setClickable(false);
+                                        for (int i = 0; i < arrLength; i++) {
+                                            TextView currentTextView = getView().findViewWithTag("Text " + Integer.toString(i));
+                                            currentTextView.setClickable(false);
+                                        }
                                         turnTaken = true;
                                     } else {
                                         if (entry.getKey() == keyFlipped) {
+                                            foundMatches.add(entry.getKey());
                                             newWordTextView.setText(entry.getValue());
                                             Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-                                            imageListView.setClickable(true);
-                                            newWordTextView.setClickable(false);
+                                            resetClickables(arrLength);
                                         } else {
-                                            ImageButton image = getView().findViewWithTag("Image " + Integer.toString(keyFlipped));
-                                            Picasso.get()
-                                                    .load(getImage("card"))
-                                                    .into(image);
-                                            image.setClickable(true);
-                                            imageListView.setClickable(true);
+                                            resetClickables(arrLength);
                                             Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
                                         }
                                         turnTaken = false;
@@ -191,24 +207,25 @@ public class MemoryGameFragment extends Fragment {
                                                 .resize(275, 183)
                                                 .centerInside()
                                                 .into(newImage);
-                                        newImage.setClickable(false);
-                                        imageListView.setClickable(false);
+                                        for (int i = 0; i < arrLength; i++) {
+                                            ImageButton currentImage = getView().findViewWithTag("Image " + Integer.toString(i));
+                                            currentImage.setClickable(false);
+                                        }
                                         keyFlipped = entry.getKey();
                                         turnTaken = true;
                                     } else {
                                         if (entry.getKey() == keyFlipped) {
+                                            foundMatches.add(entry.getKey());
                                             Picasso.get()
                                                     .load(entry.getValue())
                                                     .resize(275, 183)
                                                     .centerInside()
                                                     .into(newImage);
                                             Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-                                            newImage.setClickable(false);
-                                            wordListView.setClickable(true);
+                                            resetClickables(arrLength);
                                         } else {
                                             TextView text = getView().findViewWithTag("Text " + Integer.toString(keyFlipped));
-                                            text.setClickable(true);
-                                            wordListView.setClickable(true);
+                                            resetClickables(arrLength);
                                             Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
                                         }
                                         turnTaken = false;
