@@ -2,10 +2,12 @@ import { API_KEY, API_SECRET } from './constants';
 
 const OpenTok = require('opentok');
 const express = require('express');
+const cors = require('cors');
 
 const port = 3000;
 const opentok = new OpenTok(API_KEY, API_SECRET);
 const app = express();
+app.use(cors());
 let token;
 
 app.get('/session', function(req, res) {

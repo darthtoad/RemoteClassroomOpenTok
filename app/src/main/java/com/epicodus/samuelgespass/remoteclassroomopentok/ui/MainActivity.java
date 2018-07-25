@@ -165,6 +165,32 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         });
     }
 
+    public void getSessionId(final String name) {
+        String returnId = "";
+        DatabaseReference sessionIds = FirebaseDatabase.getInstance().getReference().child("sessionIds");
+        sessionIds.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String val = (String) snapshot.child("sessionName").getValue();
+                    if (val.equals(name)) {
+                        sessionId = (String) snapshot.child("sessionId").getValue();
+                        try {
+                            connectToSession(sessionId);
+                        } catch (OpenTokException ex) {
+                            Log.e(LOG_TAG, ex.getMessage());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(LOG_TAG, databaseError.getMessage());
+            }
+        });
+    }
+
     public void connectToSession(String arg) throws OpenTokException {
         final String sessionId = arg;
         RequestQueue reqQueue = Volley.newRequestQueue(this);
@@ -544,12 +570,8 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         }
 
         if (view == mJoinSession) {
-            String id = mSessionIdText.getText().toString();
-            try {
-                connectToSession(id);
-            } catch (OpenTokException ex) {
-                Log.e(LOG_TAG, ex.toString());
-            }
+            String name = mSessionIdText.getText().toString();
+            getSessionId(name);
         }
 
         if (view == mDisconnect) {

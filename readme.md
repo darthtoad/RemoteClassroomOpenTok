@@ -27,11 +27,11 @@ _This app is geared towards teaching foreign languages on a smartphone. One of t
 
 ## Future Features
 
-* Enable dragging for division bar to make bottom frame larger or smaller
 * Differentiate between students and teachers
-* Create website so teachers can make activities
+* Connect to session through alias instead of sessionId
 * Add more activities
 * Improve layouts by implementing RecyclerViews
+* Improve speed by adding threads
 
 ## Setup/Installation Requirements
 
