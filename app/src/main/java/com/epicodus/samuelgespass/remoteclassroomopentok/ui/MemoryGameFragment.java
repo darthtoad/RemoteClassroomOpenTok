@@ -4,17 +4,13 @@ package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,10 +20,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.Target;
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
 import com.epicodus.samuelgespass.remoteclassroomopentok.util.OnSessionCreated;
 import com.google.firebase.auth.FirebaseAuth;
@@ -65,14 +57,17 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
     String wordListName;
     String sessionId;
     String token;
+    OnSessionCreated mOnSessionCreated;
     ArrayList<Integer> foundMatches = new ArrayList<>();
     private Session mSession;
-    private OnSessionCreated mOnSessionCreated;
     private TextView title;
     private LinearLayout wordListView;
     private LinearLayout imageListView;
+    int arrLength;
+    HashMap<Integer, String> wordMap = new HashMap<>();
+    HashMap<Integer, String> urlMap = new HashMap<>();
 
-    public void textFlippedTurnNotTaken(TextView newWordTextView, final Map.Entry<Integer, String> entry, int arrLength) {
+    public void textFlippedTurnNotTaken(TextView newWordTextView, final Map.Entry<Integer, String> entry) {
         newWordTextView.setText(entry.getValue());
         keyFlipped = entry.getKey();
         for (int i = 0; i < arrLength; i++) {
@@ -82,21 +77,21 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
         turnTaken = true;
     }
 
-    public void textFlippedNoMatch(int arrLength) {
-        resetClickables(arrLength);
+    public void textFlippedNoMatch() {
+        resetClickables();
         Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
         turnTaken = false;
     }
 
-    public void textFlippedMatch(final Map.Entry<Integer, String> entry, TextView newWordTextView, int arrLength) {
+    public void textFlippedMatch(final Map.Entry<Integer, String> entry, TextView newWordTextView) {
         foundMatches.add(entry.getKey());
         newWordTextView.setText(entry.getValue());
         Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-        resetClickables(arrLength);
+        resetClickables();
         turnTaken = false;
     }
 
-    public void imageFlippedTurnNotTaken(final Map.Entry<Integer, String> entry, ImageButton newImage, int arrLength) {
+    public void imageFlippedTurnNotTaken(final Map.Entry<Integer, String> entry, ImageButton newImage) {
         Picasso.get()
                 .load(entry.getValue())
                 .resize(275, 183)
@@ -110,13 +105,13 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
         turnTaken = true;
     }
 
-    public void imageFlippedNoMatch(int arrLength) {
-        resetClickables(arrLength);
+    public void imageFlippedNoMatch() {
+        resetClickables();
         Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
         turnTaken = false;
     }
 
-    public void imageFlippedMatch(final Map.Entry<Integer, String> entry, ImageButton newImage, int arrLength) {
+    public void imageFlippedMatch(final Map.Entry<Integer, String> entry, ImageButton newImage) {
         foundMatches.add(entry.getKey());
         Picasso.get()
                 .load(entry.getValue())
@@ -124,7 +119,7 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
                 .centerInside()
                 .into(newImage);
         Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
-        resetClickables(arrLength);
+        resetClickables();
         turnTaken = false;
     }
 
@@ -157,7 +152,7 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
         }));
     }
 
-    public void resetClickables(int arrLength) {
+    public void resetClickables() {
         for (int i = 0; i < arrLength; i++) {
             TextView currentTextView = getView().findViewWithTag("Text " + Integer.toString(i));
             ImageButton currentImage = getView().findViewWithTag("Image " + Integer.toString(i));
@@ -187,7 +182,7 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.e("Start", "onDataChange1: ");
-                int arrLength = (int) dataSnapshot.getChildrenCount();
+                arrLength = (int) dataSnapshot.getChildrenCount();
                 final String[] wordArr = new String[arrLength];
                 int index = 0;
                 for (DataSnapshot wordSnapshot : dataSnapshot.getChildren()) {
@@ -200,7 +195,7 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         Log.e("Start", "onDataChange2: ");
-                        final int arrLength = (int) dataSnapshot.getChildrenCount();
+//                        final int arrLength = (int) dataSnapshot.getChildrenCount();
                         String[] urlArr = new String[arrLength];
                         Integer index = 0;
                         for (DataSnapshot urlSnapshot : dataSnapshot.getChildren()) {
@@ -212,7 +207,6 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
 
 
                         index = 0;
-                        HashMap<Integer, String> wordMap = new HashMap<>();
 
                         for (String word : wordArr) {
                             wordMap.put(index, word);
@@ -243,7 +237,7 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
                                 @Override
                                 public void onClick(View v) {
                                     if (!turnTaken) {
-                                        textFlippedTurnNotTaken(newWordTextView, entry, arrLength);
+                                        mSession.sendSignal(Integer.toString(entry.getKey()), "textFlippedTurnNotTaken");
                                         //TextView clicked, turn not taken
 //                                        newWordTextView.setText(entry.getValue());
 //                                        keyFlipped = entry.getKey();
@@ -253,16 +247,17 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
 //                                        }
 //                                        turnTaken = true;
                                     } else {
-                                        if (entry.getKey() == keyFlipped) {
+                                        if (entry.getKey().equals(keyFlipped)) {
                                             //TextView clicked, turn taken, match
 //                                            foundMatches.add(entry.getKey());
 //                                            newWordTextView.setText(entry.getValue());
 //                                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
 //                                            resetClickables(arrLength);
-                                            textFlippedMatch(entry, newWordTextView, arrLength);
+                                            mSession.sendSignal(Integer.toString(entry.getKey()), "textFlippedMatch");
+//                                            textFlippedMatch(entry, newWordTextView);
                                         } else {
                                             //TextView clicked, turn taken, no match
-                                            textFlippedNoMatch(arrLength);
+                                            mSession.sendSignal(Integer.toString(entry.getKey()), "textFlippedNoMatch");
 //                                            resetClickables(arrLength);
 //                                            Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
                                         }
@@ -273,7 +268,6 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
 
                         }
 
-                        HashMap<Integer, String> urlMap = new HashMap<>();
                         index = 0;
 
                         for (String url : urlArr) {
@@ -299,7 +293,8 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
                                 @Override
                                 public void onClick(View v) {
                                     if (!turnTaken) {
-                                        imageFlippedTurnNotTaken(entry, newImage, arrLength);
+                                        mSession.sendSignal(Integer.toString(entry.getKey()), "imageFlippedTurnNotTaken");
+//                                        imageFlippedTurnNotTaken(entry, newImage);
                                         //ImageButton clicked, turn not taken
 //                                        Picasso.get()
 //                                                .load(entry.getValue())
@@ -313,8 +308,8 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
 //                                        keyFlipped = entry.getKey();
 //                                        turnTaken = true;
                                     } else {
-                                        if (entry.getKey() == keyFlipped) {
-                                            imageFlippedMatch(entry, newImage, arrLength);
+                                        if (entry.getKey().equals(keyFlipped)) {
+                                            mSession.sendSignal(Integer.toString(entry.getKey()), "imageFlippedMatch");
                                             //imageButtonFlipped, turn taken, match
 //                                            foundMatches.add(entry.getKey());
 //                                            Picasso.get()
@@ -325,7 +320,7 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
 //                                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
 //                                            resetClickables(arrLength);
                                         } else {
-                                            imageFlippedNoMatch(arrLength);
+                                            mSession.sendSignal(Integer.toString(entry.getKey()), "imageFlippedNoMatch");
                                             //imageButtonFlipped, turn taken, no match
 //                                            resetClickables(arrLength);
 //                                            Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
@@ -404,13 +399,107 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
 
     @Override
     public void onStreamReceived(Session session, Stream stream) {
-        Log.e("Memory Game", "Stream Receieved");
+        Log.e("Memory Game", "Stream Received");
     }
 
     @Override
     public void onSignalReceived(Session session, String type, String data, Connection connection) {
-        if (type == "Memory Game") {
+        //To do: change to send signals. Find TextView/ImageButton by tag. Figure out entry key (it may be the same as the iterator but I'm unsure). Then call method.
+        for (int i = 0; i < arrLength; i++) {
+            final Integer I = i;
+            if (type.equals(Integer.toString(I))) {
+                if (data.equals("textFlippedTurnNotTaken")) {
+                    Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
+                        @Override
+                        public Integer getKey() {
+                            return I;
+                        }
 
+                        @Override
+                        public String getValue() {
+                            return wordMap.get(I);
+                        }
+
+                        @Override
+                        public String setValue(String value) {
+                            return null;
+                        }
+                    };
+                    TextView textView = getView().findViewWithTag("Text " + Integer.toString(i));
+                    textFlippedTurnNotTaken(textView, entry);
+                }
+
+                if (data.equals("textFlippedNoMatch")) {
+                    textFlippedNoMatch();
+                }
+
+                if (data.equals("textFlippedMatch")) {
+                    Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
+                        @Override
+                        public Integer getKey() {
+                            return I;
+                        }
+
+                        @Override
+                        public String getValue() {
+                            return wordMap.get(I);
+                        }
+
+                        @Override
+                        public String setValue(String value) {
+                            return null;
+                        }
+                    };
+                    TextView textView = getView().findViewWithTag("Text " + Integer.toString(i));
+                    textFlippedMatch(entry, textView);
+                }
+
+                if (data.equals("imageFlippedTurnNotTaken")) {
+                    Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
+                        @Override
+                        public Integer getKey() {
+                            return I;
+                        }
+
+                        @Override
+                        public String getValue() {
+                            return urlMap.get(I);
+                        }
+
+                        @Override
+                        public String setValue(String value) {
+                            return null;
+                        }
+                    };
+                    ImageButton image = getView().findViewWithTag("Image " + Integer.toString(i));
+                    imageFlippedTurnNotTaken(entry, image);
+                }
+
+                if (data.equals("imageFlippedNoMatch")) {
+                    imageFlippedNoMatch();
+                }
+
+                if (data.equals("imageFlippedMatch")) {
+                    Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
+                        @Override
+                        public Integer getKey() {
+                            return I;
+                        }
+
+                        @Override
+                        public String getValue() {
+                            return urlMap.get(I);
+                        }
+
+                        @Override
+                        public String setValue(String value) {
+                            return null;
+                        }
+                    };
+                    ImageButton image = getView().findViewWithTag("Image " + Integer.toString(i));
+                    imageFlippedMatch(entry, image);
+                }
+            }
         }
     }
 

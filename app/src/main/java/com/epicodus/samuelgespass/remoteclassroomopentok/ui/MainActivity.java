@@ -1,7 +1,5 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
-import com.epicodus.samuelgespass.remoteclassroomopentok.models.WordList;
 
-import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.view.MotionEventCompat;
@@ -16,7 +14,6 @@ import com.epicodus.samuelgespass.remoteclassroomopentok.Constants;
 import com.epicodus.samuelgespass.remoteclassroomopentok.R;
 import com.epicodus.samuelgespass.remoteclassroomopentok.util.OnSessionCreated;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,9 +29,7 @@ import com.opentok.android.Subscriber;
 import com.opentok.android.OpentokError;
 import android.support.annotation.NonNull;
 import android.Manifest;
-import android.view.DragEvent;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -67,9 +62,7 @@ import static android.view.MotionEvent.INVALID_POINTER_ID;
 public class MainActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener, View.OnClickListener, AdapterView.OnItemSelectedListener, Session.SignalListener, OnSessionCreated, View.OnTouchListener {
 
     private static String API_KEY = Constants.API_KEY;
-    private static String API_SECRET = Constants.API_SECRET;
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
-    private static final int RC_SETTINGS_SCREEN_PERM = 123;
     private static final int RC_VIDEO_APP_PERM = 124;
     String sessionId;
     String token;
@@ -96,13 +89,8 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private View mSeparator;
     private float mPosY;
     private float mLastTouchY;
-    private int upBound;
-    private int downBound;
     private int windowHeight;
     private int mActivePointerId = INVALID_POINTER_ID;
-    private Bundle activityBundle;
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
 
     public int getImage(String imageName) {
 
@@ -618,7 +606,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
                 mSession.sendSignal("Activity", "None");
             }
         } else {
-            Toast.makeText(getApplicationContext(), "Please connect to a session", Toast.LENGTH_LONG);
+            Toast.makeText(getApplicationContext(), "Please connect to a session", Toast.LENGTH_LONG).show();
         }
     }
 
