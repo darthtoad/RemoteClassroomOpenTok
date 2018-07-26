@@ -154,7 +154,12 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
                 }
                 ArrayAdapter<String> adapter =  new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, listNames);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
                 mSelectWordListSpinner.setAdapter(adapter);
+                if (listNameArrayLength > 0) {
+                    ArrayAdapter<CharSequence> selectActivityAdapter = ArrayAdapter.createFromResource(getApplicationContext(), R.array.select_activity_array, android.R.layout.simple_spinner_dropdown_item);
+                    mSelectActivitySpinner.setAdapter(selectActivityAdapter);
+                }
             }
 
             @Override
@@ -165,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     }
 
     public void getSessionId(final String name) {
+        final String oldId = sessionId;
         DatabaseReference sessionIds = FirebaseDatabase.getInstance().getReference().child("sessionIds");
         sessionIds.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -261,10 +267,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         windowHeight = displayMetrics.heightPixels;
 
-        mSelectActivitySpinner = (Spinner) findViewById(R.id.activity_select_spinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.select_activity_array, android.R.layout.simple_spinner_dropdown_item);
-        mSelectActivitySpinner.setAdapter(adapter);
-        mSelectActivitySpinner.setOnItemSelectedListener(this);
 
         mSignOut = (Button) findViewById(R.id.signOut);
         mSignOut.setOnClickListener(this);
@@ -300,6 +302,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mToggleAudio = (ImageButton) findViewById(R.id.toggle_audio);
             mToggleVideo = (ImageButton) findViewById(R.id.toggle_video);
             mSelectWordListSpinner = (Spinner) findViewById(R.id.word_list_select_spinner);
+            mSelectActivitySpinner = (Spinner) findViewById(R.id.activity_select_spinner);
             getWordLists();
 
             ViewGroup.LayoutParams fragmentParams = mFragmentContainer.getLayoutParams();
@@ -341,6 +344,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             mDisconnect.setOnClickListener(this);
             mSeparator.setOnTouchListener(this);
             mSelectWordListSpinner.setOnItemSelectedListener(this);
+            mSelectActivitySpinner.setOnItemSelectedListener(this);
 
             Log.i(LOG_TAG, "requestPermissions success");
 
@@ -371,8 +375,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
         mPublisherViewContainer.addView(mPublisher.getView());
         mSession.publish(mPublisher);
-        mJoinSession.setVisibility(View.INVISIBLE);
-        mDisconnect.setVisibility(View.VISIBLE);
         mToggleVideo.setOnClickListener(this);
         mToggleAudio.setOnClickListener(this);
     }
@@ -384,8 +386,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         mPublisherViewContainer.removeAllViews();
         mToggleVideo.setOnClickListener(null);
         mToggleAudio.setOnClickListener(null);
-        mJoinSession.setVisibility(View.VISIBLE);
-        mDisconnect.setVisibility(View.INVISIBLE);
         Glide.with(this)
                 .load(getImage("audioon"))
                 .apply(new RequestOptions().override(50, 50))
@@ -556,6 +556,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         }
 
         if (view == mJoinSession) {
+            mJoinSession.setOnClickListener(null);
             String name = mSessionIdText.getText().toString();
             getSessionId(name);
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -563,6 +564,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         }
 
         if (view == mDisconnect) {
+            mJoinSession.setOnClickListener(this);
             if (isConnected) {
                 mSession.disconnect();
             }
