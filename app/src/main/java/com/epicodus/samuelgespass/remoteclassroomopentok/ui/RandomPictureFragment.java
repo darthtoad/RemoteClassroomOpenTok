@@ -51,6 +51,7 @@ public class RandomPictureFragment extends Fragment implements Session.SessionLi
     ImageButton mImageButton;
     int arrLength;
     String[] globalUrlArr;
+    String userId;
 
     public void connectToSession(String arg) throws OpenTokException {
         final String sessionId = arg;
@@ -84,36 +85,42 @@ public class RandomPictureFragment extends Fragment implements Session.SessionLi
     public void getList() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
-        String userId = user.getUid();
+        userId = user.getUid();
         Log.e("userId: ", userId);
-        DatabaseReference databaseReferenceWords = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(mWordListName).child("urlList");
-        ValueEventListener wordEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                arrLength = (int) dataSnapshot.getChildrenCount();
-                final String[] wordArr = new String[arrLength];
-                int index = 0;
-                for (DataSnapshot wordSnapshot : dataSnapshot.getChildren()) {
-                    String word = (String) wordSnapshot.getValue();
-                    wordArr[index] = word;
-                    index++;
-                }
-                globalUrlArr = wordArr;
-                mImageButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mSession.sendSignal("", "Random Image");
+        try {
+            DatabaseReference databaseReferenceWords = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(mWordListName).child("urlList");
+            mSession.sendSignal("userId", userId);
+            ValueEventListener wordEventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    arrLength = (int) dataSnapshot.getChildrenCount();
+                    final String[] wordArr = new String[arrLength];
+                    int index = 0;
+                    for (DataSnapshot wordSnapshot : dataSnapshot.getChildren()) {
+                        String word = (String) wordSnapshot.getValue();
+                        wordArr[index] = word;
+                        index++;
                     }
-                });
-                mSession.sendSignal("", "Random Image");
-            }
+                    globalUrlArr = wordArr;
+                    mImageButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mSession.sendSignal("", "Random Image");
+                        }
+                    });
+                    mSession.sendSignal("", "Random Image");
+                }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("RandomPictureFragment", databaseError.getMessage());
-            }
-        };
-        databaseReferenceWords.addValueEventListener(wordEventListener);
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e("RandomPictureFragment", databaseError.getMessage());
+                }
+            };
+            databaseReferenceWords.addValueEventListener(wordEventListener);
+        } catch (NullPointerException ex) {
+            Log.e("Random Picture Fragment", "Not a teacher");
+        }
+
 
     }
 
@@ -209,6 +216,10 @@ public class RandomPictureFragment extends Fragment implements Session.SessionLi
             Picasso.get()
                     .load(urlToSet)
                     .into(mImageButton);
+        }
+
+        if (type.equals("userId")) {
+            userId = data;
         }
     }
 }

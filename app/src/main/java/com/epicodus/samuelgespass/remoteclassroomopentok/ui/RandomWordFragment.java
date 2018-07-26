@@ -56,6 +56,7 @@ public class RandomWordFragment extends Fragment implements Session.SessionListe
     TextView mWordTextView;
     int arrLength;
     String[] globalWordArr;
+    String userId;
 
     public void connectToSession(String arg) throws OpenTokException {
         final String sessionId = arg;
@@ -89,36 +90,42 @@ public class RandomWordFragment extends Fragment implements Session.SessionListe
     public void getList() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
-        String userId = user.getUid();
+        userId = user.getUid();
         Log.e("userId: ", userId);
-        DatabaseReference databaseReferenceWords = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(mWordListName).child("wordList");
-        ValueEventListener wordEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                arrLength = (int) dataSnapshot.getChildrenCount();
-                final String[] wordArr = new String[arrLength];
-                int index = 0;
-                for (DataSnapshot wordSnapshot : dataSnapshot.getChildren()) {
-                    String word = (String) wordSnapshot.getValue();
-                    wordArr[index] = word;
-                    index++;
-                }
-                globalWordArr = wordArr;
-                mWordTextView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mSession.sendSignal("", "Random Word");
+        try {
+            DatabaseReference databaseReferenceWords = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(mWordListName).child("wordList");
+            mSession.sendSignal("userId", userId);
+            ValueEventListener wordEventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    arrLength = (int) dataSnapshot.getChildrenCount();
+                    final String[] wordArr = new String[arrLength];
+                    int index = 0;
+                    for (DataSnapshot wordSnapshot : dataSnapshot.getChildren()) {
+                        String word = (String) wordSnapshot.getValue();
+                        wordArr[index] = word;
+                        index++;
                     }
-                });
-                mSession.sendSignal("", "Random Word");
-            }
+                    globalWordArr = wordArr;
+                    mWordTextView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mSession.sendSignal("", "Random Word");
+                        }
+                    });
+                    mSession.sendSignal("", "Random Word");
+                }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        };
-        databaseReferenceWords.addValueEventListener(wordEventListener);
+                }
+            };
+            databaseReferenceWords.addValueEventListener(wordEventListener);
+        } catch (NullPointerException ex) {
+            Log.e("RandomWordFragment", "Not a teacher");
+        }
+
 
     }
 
@@ -211,6 +218,10 @@ public class RandomWordFragment extends Fragment implements Session.SessionListe
         if (data.equals("Random Word")) {
             int random = (int) Math.round(Math.random() * (arrLength - 1));
             mWordTextView.setText(globalWordArr[random]);
+        }
+
+        if (type.equals("userId")) {
+            userId = data;
         }
     }
 }

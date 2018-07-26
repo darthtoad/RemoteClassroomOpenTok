@@ -76,7 +76,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void createAuthProgressDialog() {
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("LOADING...");
-        progressDialog.setMessage("Please wait \uD83D\uDD52");
+        progressDialog.setMessage("Please wait");
         progressDialog.setCancelable(false);
     }
 

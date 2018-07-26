@@ -72,7 +72,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     private void createAuthProgressDialog() {
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Loading...");
-        progressDialog.setMessage("Please wait... \\uD83D\\uDD52");
+        progressDialog.setMessage("Please wait...");
         progressDialog.setCancelable(false);
     }
 

@@ -2,6 +2,7 @@ package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -557,6 +559,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
         if (view == mJoinSession) {
             mJoinSession.setOnClickListener(null);
+
             String name = mSessionIdText.getText().toString();
             getSessionId(name);
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);

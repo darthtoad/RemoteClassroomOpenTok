@@ -66,6 +66,7 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
     int arrLength;
     HashMap<Integer, String> wordMap = new HashMap<>();
     HashMap<Integer, String> urlMap = new HashMap<>();
+    String userId;
 
     public void textFlippedTurnNotTaken(TextView newWordTextView, final Map.Entry<Integer, String> entry) {
         newWordTextView.setText(entry.getValue());
@@ -173,72 +174,75 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
     public void getLists() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
-        String userId = user.getUid();
+        userId = user.getUid();
         Log.e("userId: ", userId);
-        DatabaseReference databaseReferenceWords = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(wordListName).child("wordList");
-        final DatabaseReference databaseReferenceUrls = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(wordListName).child("urlList");
+        try {
+            DatabaseReference databaseReferenceWords = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(wordListName).child("wordList");
+            final DatabaseReference databaseReferenceUrls = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(wordListName).child("urlList");
 
-        ValueEventListener wordsEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.e("Start", "onDataChange1: ");
-                arrLength = (int) dataSnapshot.getChildrenCount();
-                final String[] wordArr = new String[arrLength];
-                int index = 0;
-                for (DataSnapshot wordSnapshot : dataSnapshot.getChildren()) {
-                    String word = (String) wordSnapshot.getValue();
-                    wordArr[index] = word;
-                    index++;
-                }
+            mSession.sendSignal("userId", userId);
 
-                ValueEventListener urlEventListener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Log.e("Start", "onDataChange2: ");
+            ValueEventListener wordsEventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Log.e("Start", "onDataChange1: ");
+                    arrLength = (int) dataSnapshot.getChildrenCount();
+                    final String[] wordArr = new String[arrLength];
+                    int index = 0;
+                    for (DataSnapshot wordSnapshot : dataSnapshot.getChildren()) {
+                        String word = (String) wordSnapshot.getValue();
+                        wordArr[index] = word;
+                        index++;
+                    }
+
+                    ValueEventListener urlEventListener = new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            Log.e("Start", "onDataChange2: ");
 //                        final int arrLength = (int) dataSnapshot.getChildrenCount();
-                        String[] urlArr = new String[arrLength];
-                        Integer index = 0;
-                        for (DataSnapshot urlSnapshot : dataSnapshot.getChildren()) {
-                            String url = (String) urlSnapshot.getValue();
-                            urlArr[index] = url;
-                            index++;
-                        }
-                        Log.e("Success", "onDataChange2: ");
+                            String[] urlArr = new String[arrLength];
+                            Integer index = 0;
+                            for (DataSnapshot urlSnapshot : dataSnapshot.getChildren()) {
+                                String url = (String) urlSnapshot.getValue();
+                                urlArr[index] = url;
+                                index++;
+                            }
+                            Log.e("Success", "onDataChange2: ");
 
 
-                        index = 0;
+                            index = 0;
 
-                        for (String word : wordArr) {
-                            wordMap.put(index, word);
-                            index++;
-                        }
+                            for (String word : wordArr) {
+                                wordMap.put(index, word);
+                                index++;
+                            }
 
-                        //randomize hashmap and add views
+                            //randomize hashmap and add views
 
-                        Object[] wordKeys = wordMap.keySet().toArray();
-                        Object key = wordKeys[new Random().nextInt(wordKeys.length)];
+                            Object[] wordKeys = wordMap.keySet().toArray();
+                            Object key = wordKeys[new Random().nextInt(wordKeys.length)];
 
-                        List<Map.Entry<Integer, String>> wordList = new ArrayList<Map.Entry<Integer, String>>(wordMap.entrySet());
-                        Collections.shuffle(wordList);
+                            List<Map.Entry<Integer, String>> wordList = new ArrayList<Map.Entry<Integer, String>>(wordMap.entrySet());
+                            Collections.shuffle(wordList);
 
-                        for (final Map.Entry<Integer, String> entry : wordList) {
-                            final TextView newWordTextView = new TextView(getActivity().getApplicationContext());
-                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                            params.setMargins(10, 0, 0, 20);
-                            newWordTextView.setLayoutParams(params);
-                            newWordTextView.setTextSize(20);
-                            newWordTextView.setBottom(5);
-                            newWordTextView.setTextColor(Color.parseColor("#ff0000"));
-                            newWordTextView.setBackgroundColor(Color.parseColor("#000000"));
-                            newWordTextView.setText("Click To See Word");
-                            wordListView.addView(newWordTextView);
-                            newWordTextView.setTag("Text " + Integer.toString(entry.getKey()));
-                            newWordTextView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    if (!turnTaken) {
-                                        mSession.sendSignal(Integer.toString(entry.getKey()), "textFlippedTurnNotTaken");
-                                        //TextView clicked, turn not taken
+                            for (final Map.Entry<Integer, String> entry : wordList) {
+                                final TextView newWordTextView = new TextView(getActivity().getApplicationContext());
+                                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                params.setMargins(10, 0, 0, 20);
+                                newWordTextView.setLayoutParams(params);
+                                newWordTextView.setTextSize(20);
+                                newWordTextView.setBottom(5);
+                                newWordTextView.setTextColor(Color.parseColor("#ff0000"));
+                                newWordTextView.setBackgroundColor(Color.parseColor("#000000"));
+                                newWordTextView.setText("Click To See Word");
+                                wordListView.addView(newWordTextView);
+                                newWordTextView.setTag("Text " + Integer.toString(entry.getKey()));
+                                newWordTextView.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if (!turnTaken) {
+                                            mSession.sendSignal(Integer.toString(entry.getKey()), "textFlippedTurnNotTaken");
+                                            //TextView clicked, turn not taken
 //                                        newWordTextView.setText(entry.getValue());
 //                                        keyFlipped = entry.getKey();
 //                                        for (int i = 0; i < arrLength; i++) {
@@ -246,56 +250,56 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
 //                                            currentTextView.setClickable(false);
 //                                        }
 //                                        turnTaken = true;
-                                    } else {
-                                        if (entry.getKey().equals(keyFlipped)) {
-                                            //TextView clicked, turn taken, match
+                                        } else {
+                                            if (entry.getKey().equals(keyFlipped)) {
+                                                //TextView clicked, turn taken, match
 //                                            foundMatches.add(entry.getKey());
 //                                            newWordTextView.setText(entry.getValue());
 //                                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
 //                                            resetClickables(arrLength);
-                                            mSession.sendSignal(Integer.toString(entry.getKey()), "textFlippedMatch");
+                                                mSession.sendSignal(Integer.toString(entry.getKey()), "textFlippedMatch");
 //                                            textFlippedMatch(entry, newWordTextView);
-                                        } else {
-                                            //TextView clicked, turn taken, no match
-                                            mSession.sendSignal(Integer.toString(entry.getKey()), "textFlippedNoMatch");
+                                            } else {
+                                                //TextView clicked, turn taken, no match
+                                                mSession.sendSignal(Integer.toString(entry.getKey()), "textFlippedNoMatch");
 //                                            resetClickables(arrLength);
 //                                            Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
-                                        }
+                                            }
 //                                        turnTaken = false;
+                                        }
                                     }
-                                }
-                            });
+                                });
 
-                        }
+                            }
 
-                        index = 0;
+                            index = 0;
 
-                        for (String url : urlArr) {
-                            urlMap.put(index, url);
-                            index++;
-                        }
+                            for (String url : urlArr) {
+                                urlMap.put(index, url);
+                                index++;
+                            }
 
-                        Object urlKeys[] = urlMap.keySet().toArray();
-                        Object urlKey = urlKeys[new Random().nextInt(urlKeys.length)];
+                            Object urlKeys[] = urlMap.keySet().toArray();
+                            Object urlKey = urlKeys[new Random().nextInt(urlKeys.length)];
 
-                        List<Map.Entry<Integer, String>> urlList = new ArrayList<Map.Entry<Integer, String>>(urlMap.entrySet());
-                        Collections.shuffle(urlList);
+                            List<Map.Entry<Integer, String>> urlList = new ArrayList<Map.Entry<Integer, String>>(urlMap.entrySet());
+                            Collections.shuffle(urlList);
 
-                        for (final Map.Entry<Integer, String> entry : urlList) {
-                            final ImageButton newImage = new ImageButton(getContext());
-                            newImage.setBottom(5);
-                            imageListView.addView(newImage);
-                            Picasso.get()
-                                    .load(getImage("card"))
-                                    .into(newImage);
-                            newImage.setTag("Image " + Integer.toString(entry.getKey()));
-                            newImage.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    if (!turnTaken) {
-                                        mSession.sendSignal(Integer.toString(entry.getKey()), "imageFlippedTurnNotTaken");
+                            for (final Map.Entry<Integer, String> entry : urlList) {
+                                final ImageButton newImage = new ImageButton(getContext());
+                                newImage.setBottom(5);
+                                imageListView.addView(newImage);
+                                Picasso.get()
+                                        .load(getImage("card"))
+                                        .into(newImage);
+                                newImage.setTag("Image " + Integer.toString(entry.getKey()));
+                                newImage.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if (!turnTaken) {
+                                            mSession.sendSignal(Integer.toString(entry.getKey()), "imageFlippedTurnNotTaken");
 //                                        imageFlippedTurnNotTaken(entry, newImage);
-                                        //ImageButton clicked, turn not taken
+                                            //ImageButton clicked, turn not taken
 //                                        Picasso.get()
 //                                                .load(entry.getValue())
 //                                                .resize(275, 183)
@@ -307,10 +311,10 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
 //                                        }
 //                                        keyFlipped = entry.getKey();
 //                                        turnTaken = true;
-                                    } else {
-                                        if (entry.getKey().equals(keyFlipped)) {
-                                            mSession.sendSignal(Integer.toString(entry.getKey()), "imageFlippedMatch");
-                                            //imageButtonFlipped, turn taken, match
+                                        } else {
+                                            if (entry.getKey().equals(keyFlipped)) {
+                                                mSession.sendSignal(Integer.toString(entry.getKey()), "imageFlippedMatch");
+                                                //imageButtonFlipped, turn taken, match
 //                                            foundMatches.add(entry.getKey());
 //                                            Picasso.get()
 //                                                    .load(entry.getValue())
@@ -319,40 +323,44 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
 //                                                    .into(newImage);
 //                                            Toast.makeText(getContext(), "You found a match!", Toast.LENGTH_LONG).show();
 //                                            resetClickables(arrLength);
-                                        } else {
-                                            mSession.sendSignal(Integer.toString(entry.getKey()), "imageFlippedNoMatch");
-                                            //imageButtonFlipped, turn taken, no match
+                                            } else {
+                                                mSession.sendSignal(Integer.toString(entry.getKey()), "imageFlippedNoMatch");
+                                                //imageButtonFlipped, turn taken, no match
 //                                            resetClickables(arrLength);
 //                                            Toast.makeText(getContext(), "Try again!", Toast.LENGTH_LONG).show();
-                                        }
+                                            }
 //                                        turnTaken = false;
+                                        }
                                     }
-                                }
-                            });
-                        }
+                                });
+                            }
 //                        newBundle.putStringArray("URL List", urlArr);
-                    }
+                        }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.e("error", databaseError.getMessage());
-                    }
-                };
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.e("error", databaseError.getMessage());
+                        }
+                    };
 
-                databaseReferenceUrls.addListenerForSingleValueEvent(urlEventListener);
+                    databaseReferenceUrls.addListenerForSingleValueEvent(urlEventListener);
 
 //                newBundle.putStringArray("Word List", wordArr);
-                Log.e("Success", "onDataChange1: ");
-            }
+                    Log.e("Success", "onDataChange1: ");
+                }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("error", databaseError.getMessage());
-            }
-        };
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e("error", databaseError.getMessage());
+                }
+            };
 
-        databaseReferenceWords.addListenerForSingleValueEvent(wordsEventListener);
-        Log.e("GREAT SUCCESS", "getLists: ");
+            databaseReferenceWords.addListenerForSingleValueEvent(wordsEventListener);
+            Log.e("GREAT SUCCESS", "getLists: ");
+        } catch (NullPointerException ex) {
+            Log.e("Memory Game", "Not a teacher");
+        }
+
     }
 
     public MemoryGameFragment() {
@@ -405,6 +413,9 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
     @Override
     public void onSignalReceived(Session session, String type, String data, Connection connection) {
         //To do: change to send signals. Find TextView/ImageButton by tag. Figure out entry key (it may be the same as the iterator but I'm unsure). Then call method.
+        if (type.equals("userId")) {
+            userId = data;
+        }
         for (int i = 0; i < arrLength; i++) {
             final Integer I = i;
             if (type.equals(Integer.toString(I))) {
