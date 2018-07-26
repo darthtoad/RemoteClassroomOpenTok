@@ -371,6 +371,8 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
         mPublisherViewContainer.addView(mPublisher.getView());
         mSession.publish(mPublisher);
+        mJoinSession.setVisibility(View.INVISIBLE);
+        mDisconnect.setVisibility(View.VISIBLE);
         mToggleVideo.setOnClickListener(this);
         mToggleAudio.setOnClickListener(this);
     }
@@ -382,6 +384,8 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         mPublisherViewContainer.removeAllViews();
         mToggleVideo.setOnClickListener(null);
         mToggleAudio.setOnClickListener(null);
+        mJoinSession.setVisibility(View.VISIBLE);
+        mDisconnect.setVisibility(View.INVISIBLE);
         Glide.with(this)
                 .load(getImage("audioon"))
                 .apply(new RequestOptions().override(50, 50))
