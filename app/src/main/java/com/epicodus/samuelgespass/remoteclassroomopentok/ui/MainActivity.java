@@ -612,7 +612,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         if (type != null && type.equals("Activity")) {
             if (data.equals("Memory Game")) {
                 String wordListName = (String) mSelectWordListSpinner.getSelectedItem();
-                Log.e("List Name", wordListName);
                 MemoryGameFragment memoryGameFragment = MemoryGameFragment.newInstance(wordListName, sessionId);
                 Log.e("Selected", "onItemSelected: ");
                 android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();

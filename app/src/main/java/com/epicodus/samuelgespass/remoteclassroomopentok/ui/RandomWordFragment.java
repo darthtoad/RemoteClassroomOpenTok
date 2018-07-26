@@ -57,6 +57,7 @@ public class RandomWordFragment extends Fragment implements Session.SessionListe
     int arrLength;
     String[] globalWordArr;
     String userId;
+    String originalUserId;
 
     public void connectToSession(String arg) throws OpenTokException {
         final String sessionId = arg;
@@ -90,9 +91,18 @@ public class RandomWordFragment extends Fragment implements Session.SessionListe
     public void getList() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
-        userId = user.getUid();
-        Log.e("userId: ", userId);
         try {
+            if (FirebaseDatabase.getInstance().getReference().child("users").child(originalUserId).child(mWordListName) != null) {
+                Log.e("adfsfdsa", "is original");
+                userId = user.getUid();
+            }
+        } catch (NullPointerException ex) {
+            Log.e("Random Word Fragment", ex.getMessage());
+        }
+
+        try {
+            Log.e("user id", userId);
+            Log.e("listname", mWordListName);
             DatabaseReference databaseReferenceWords = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(mWordListName).child("wordList");
             mSession.sendSignal("userId", userId);
             ValueEventListener wordEventListener = new ValueEventListener() {
@@ -124,6 +134,11 @@ public class RandomWordFragment extends Fragment implements Session.SessionListe
             databaseReferenceWords.addValueEventListener(wordEventListener);
         } catch (NullPointerException ex) {
             Log.e("RandomWordFragment", "Not a teacher");
+            try {
+                Log.e("userId", userId);
+            } catch (NullPointerException a) {
+
+            }
         }
 
 
@@ -158,6 +173,10 @@ public class RandomWordFragment extends Fragment implements Session.SessionListe
             mWordListName = getArguments().getString("wordListName");
             mSessionId = getArguments().getString("sessionId");
         }
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
+        originalUserId = user.getUid();
+        Log.e("orignal", originalUserId);
     }
 
     @Override
@@ -216,12 +235,19 @@ public class RandomWordFragment extends Fragment implements Session.SessionListe
     @Override
     public void onSignalReceived(Session session, String type, String data, Connection connection) {
         if (data.equals("Random Word")) {
+            Log.e("Random WOrd", userId);
             int random = (int) Math.round(Math.random() * (arrLength - 1));
-            mWordTextView.setText(globalWordArr[random]);
+            try {
+                mWordTextView.setText(globalWordArr[random]);
+            } catch (NullPointerException ex) {
+                Log.e("dfadsaa", "sadfdsaf");
+                getList();
+            }
         }
 
         if (type.equals("userId")) {
             userId = data;
+            Log.e("userId", userId);
         }
     }
 }

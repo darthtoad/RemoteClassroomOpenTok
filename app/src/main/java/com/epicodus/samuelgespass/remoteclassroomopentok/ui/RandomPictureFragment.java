@@ -52,6 +52,7 @@ public class RandomPictureFragment extends Fragment implements Session.SessionLi
     int arrLength;
     String[] globalUrlArr;
     String userId;
+    String originalUserId;
 
     public void connectToSession(String arg) throws OpenTokException {
         final String sessionId = arg;
@@ -85,8 +86,14 @@ public class RandomPictureFragment extends Fragment implements Session.SessionLi
     public void getList() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
-        userId = user.getUid();
-        Log.e("userId: ", userId);
+        try {
+            if (FirebaseDatabase.getInstance().getReference().child("users").child(originalUserId).child(mWordListName) != null) {
+                userId = user.getUid();
+            }
+        } catch (NullPointerException ex) {
+            Log.e("Random Word Fragment", ex.getMessage());
+        }
+
         try {
             DatabaseReference databaseReferenceWords = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(mWordListName).child("urlList");
             mSession.sendSignal("userId", userId);
@@ -153,6 +160,9 @@ public class RandomPictureFragment extends Fragment implements Session.SessionLi
             mWordListName = getArguments().getString("wordListName");
             mSessionId = getArguments().getString("sessionId");
         }
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
+        originalUserId = user.getUid();
     }
 
     @Override
@@ -211,15 +221,22 @@ public class RandomPictureFragment extends Fragment implements Session.SessionLi
     @Override
     public void onSignalReceived(Session session, String type, String data, Connection connection) {
         if (data.equals("Random Image")) {
-            int random = (int) Math.round(Math.random() * (arrLength - 1));
-            String urlToSet = globalUrlArr[random];
-            Picasso.get()
-                    .load(urlToSet)
-                    .into(mImageButton);
+            try {
+                int random = (int) Math.round(Math.random() * (arrLength - 1));
+                String urlToSet = globalUrlArr[random];
+                Picasso.get()
+                        .load(urlToSet)
+                        .into(mImageButton);
+            } catch (NullPointerException ex) {
+                getList();
+            }
+
         }
 
         if (type.equals("userId")) {
             userId = data;
+            getList();
+            Log.e("userId", userId);
         }
     }
 }

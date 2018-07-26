@@ -67,6 +67,7 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
     HashMap<Integer, String> wordMap = new HashMap<>();
     HashMap<Integer, String> urlMap = new HashMap<>();
     String userId;
+    String originalUserId;
 
     public void textFlippedTurnNotTaken(TextView newWordTextView, final Map.Entry<Integer, String> entry) {
         newWordTextView.setText(entry.getValue());
@@ -174,8 +175,14 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
     public void getLists() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
-        userId = user.getUid();
-        Log.e("userId: ", userId);
+        try {
+            if (FirebaseDatabase.getInstance().getReference().child("users").child(originalUserId).child(wordListName) != null) {
+                userId = user.getUid();
+            }
+        } catch (NullPointerException ex) {
+            Log.e("Random Word Fragment", ex.getMessage());
+        }
+
         try {
             DatabaseReference databaseReferenceWords = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(wordListName).child("wordList");
             final DatabaseReference databaseReferenceUrls = FirebaseDatabase.getInstance().getReference().child("users").child(userId).child(wordListName).child("urlList");
@@ -415,103 +422,109 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
         //To do: change to send signals. Find TextView/ImageButton by tag. Figure out entry key (it may be the same as the iterator but I'm unsure). Then call method.
         if (type.equals("userId")) {
             userId = data;
+            Log.e("userId", userId);
         }
-        for (int i = 0; i < arrLength; i++) {
-            final Integer I = i;
-            if (type.equals(Integer.toString(I))) {
-                if (data.equals("textFlippedTurnNotTaken")) {
-                    Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
-                        @Override
-                        public Integer getKey() {
-                            return I;
-                        }
+        try {
+            for (int i = 0; i < arrLength; i++) {
+                final Integer I = i;
+                if (type.equals(Integer.toString(I))) {
+                    if (data.equals("textFlippedTurnNotTaken")) {
+                        Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
+                            @Override
+                            public Integer getKey() {
+                                return I;
+                            }
 
-                        @Override
-                        public String getValue() {
-                            return wordMap.get(I);
-                        }
+                            @Override
+                            public String getValue() {
+                                return wordMap.get(I);
+                            }
 
-                        @Override
-                        public String setValue(String value) {
-                            return null;
-                        }
-                    };
-                    TextView textView = getView().findViewWithTag("Text " + Integer.toString(i));
-                    textFlippedTurnNotTaken(textView, entry);
-                }
+                            @Override
+                            public String setValue(String value) {
+                                return null;
+                            }
+                        };
+                        TextView textView = getView().findViewWithTag("Text " + Integer.toString(i));
+                        textFlippedTurnNotTaken(textView, entry);
+                    }
 
-                if (data.equals("textFlippedNoMatch")) {
-                    textFlippedNoMatch();
-                }
+                    if (data.equals("textFlippedNoMatch")) {
+                        textFlippedNoMatch();
+                    }
 
-                if (data.equals("textFlippedMatch")) {
-                    Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
-                        @Override
-                        public Integer getKey() {
-                            return I;
-                        }
+                    if (data.equals("textFlippedMatch")) {
+                        Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
+                            @Override
+                            public Integer getKey() {
+                                return I;
+                            }
 
-                        @Override
-                        public String getValue() {
-                            return wordMap.get(I);
-                        }
+                            @Override
+                            public String getValue() {
+                                return wordMap.get(I);
+                            }
 
-                        @Override
-                        public String setValue(String value) {
-                            return null;
-                        }
-                    };
-                    TextView textView = getView().findViewWithTag("Text " + Integer.toString(i));
-                    textFlippedMatch(entry, textView);
-                }
+                            @Override
+                            public String setValue(String value) {
+                                return null;
+                            }
+                        };
+                        TextView textView = getView().findViewWithTag("Text " + Integer.toString(i));
+                        textFlippedMatch(entry, textView);
+                    }
 
-                if (data.equals("imageFlippedTurnNotTaken")) {
-                    Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
-                        @Override
-                        public Integer getKey() {
-                            return I;
-                        }
+                    if (data.equals("imageFlippedTurnNotTaken")) {
+                        Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
+                            @Override
+                            public Integer getKey() {
+                                return I;
+                            }
 
-                        @Override
-                        public String getValue() {
-                            return urlMap.get(I);
-                        }
+                            @Override
+                            public String getValue() {
+                                return urlMap.get(I);
+                            }
 
-                        @Override
-                        public String setValue(String value) {
-                            return null;
-                        }
-                    };
-                    ImageButton image = getView().findViewWithTag("Image " + Integer.toString(i));
-                    imageFlippedTurnNotTaken(entry, image);
-                }
+                            @Override
+                            public String setValue(String value) {
+                                return null;
+                            }
+                        };
+                        ImageButton image = getView().findViewWithTag("Image " + Integer.toString(i));
+                        imageFlippedTurnNotTaken(entry, image);
+                    }
 
-                if (data.equals("imageFlippedNoMatch")) {
-                    imageFlippedNoMatch();
-                }
+                    if (data.equals("imageFlippedNoMatch")) {
+                        imageFlippedNoMatch();
+                    }
 
-                if (data.equals("imageFlippedMatch")) {
-                    Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
-                        @Override
-                        public Integer getKey() {
-                            return I;
-                        }
+                    if (data.equals("imageFlippedMatch")) {
+                        Map.Entry<Integer, String> entry = new Map.Entry<Integer, String>() {
+                            @Override
+                            public Integer getKey() {
+                                return I;
+                            }
 
-                        @Override
-                        public String getValue() {
-                            return urlMap.get(I);
-                        }
+                            @Override
+                            public String getValue() {
+                                return urlMap.get(I);
+                            }
 
-                        @Override
-                        public String setValue(String value) {
-                            return null;
-                        }
-                    };
-                    ImageButton image = getView().findViewWithTag("Image " + Integer.toString(i));
-                    imageFlippedMatch(entry, image);
+                            @Override
+                            public String setValue(String value) {
+                                return null;
+                            }
+                        };
+                        ImageButton image = getView().findViewWithTag("Image " + Integer.toString(i));
+                        imageFlippedMatch(entry, image);
+                    }
                 }
             }
+        } catch (NullPointerException ex) {
+            getLists();
         }
+
     }
 
         @Override
@@ -519,6 +532,9 @@ public class MemoryGameFragment extends Fragment implements Session.SessionListe
         super.onCreate(savedInstanceState);
         wordListName = getArguments().getString("Word List Name");
         sessionId = getArguments().getString("sessionId");
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
+        originalUserId = user.getUid();
     }
 
     @Override
