@@ -12,20 +12,12 @@
         android:layout_height="fill_parent"
         android:id="@+id/videoFrame">
 
-        <Button
-            android:id="@+id/create_session"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Create Session"
-            android:layout_gravity="top|right"
-            />
-
         <ImageButton
             android:id="@+id/disconnect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|right"
-            android:layout_marginTop="60dp"
+            android:layout_marginTop="120dp"
+            android:layout_marginLeft="5dp"
             android:elevation="3dp"
             />
 
@@ -34,8 +26,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/signOut"
             android:text="Sign Out"
-            android:layout_marginTop="240dp"
-            android:layout_marginLeft="5dp"
+            android:layout_gravity="top|right"
             android:elevation="3dp"
             />
 
@@ -49,32 +40,19 @@
             android:elevation="3dp"
             />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Make Activity\nlarger"
-            android:id="@+id/button_large_fragment"/>
-
-        <Button
-            android:id="@+id/button_small_fragment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="150dp"
-            android:text="Make Activity\nsmaller" />
-
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/toggle_audio"
-            android:layout_marginLeft="150dp"
-            android:layout_marginTop="60dp"
+            android:layout_gravity="bottom|left"
+            android:layout_marginLeft="5dp"
             android:elevation="3dp"/>
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="300dp"
-            android:layout_marginTop="60dp"
+            android:layout_gravity="bottom|left"
+            android:layout_marginLeft="65dp"
             android:id="@+id/toggle_video"
             android:elevation="3dp"/>
 
@@ -82,8 +60,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/activity_select_spinner"
-            android:layout_marginTop="60dp"
-            android:layout_marginLeft="5dp"
+            android:layout_gravity="top|center"
             android:background="@color/colorAccent"
             android:elevation="3dp"
             />
@@ -92,8 +69,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/word_list_select_spinner"
-            android:layout_gravity="top|right"
-            android:layout_marginRight="150dp"
+            android:layout_gravity="top|center"
+            android:layout_marginTop="60dp"
             android:elevation="3dp"
             android:background="@color/colorAccent"
             />
@@ -101,8 +78,7 @@
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="120dp"
-            android:layout_marginLeft="5dp"
+            android:hint="Enter Session Name"
             android:id="@+id/session_id_text"
             android:elevation="3dp"
             />
@@ -110,7 +86,7 @@
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="180dp"
+            android:layout_marginTop="60dp"
             android:layout_marginLeft="5dp"
             android:id="@+id/join_session"
             android:elevation="3dp"

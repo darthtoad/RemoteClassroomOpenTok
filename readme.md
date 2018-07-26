@@ -24,13 +24,17 @@ _This app is geared towards teaching foreign languages on a smartphone. One of t
 | It can show the card to all users when it's pressed | press card | shows to all users |
 | It hides the card if there's no match | wrong card | hides all cards |
 | It shows and alerts when card and words match | cards and words match | shows card and word |
+| It can show random words from a list | random word | random word |
+| It can show random images from a list of urls | random url | random image |
 
 ## Future Features
 
 * Differentiate between students and teachers
-* Connect to session through alias instead of sessionId
-* Add more activities
+* Add more activities including random word activity and random picture activity
+* PDF uploads and Web View, maybe done through a screen share
+* Better support for multiple students
 * Improve layouts by implementing RecyclerViews
+* Add text messaging
 * Improve speed by adding threads
 
 ## Setup/Installation Requirements

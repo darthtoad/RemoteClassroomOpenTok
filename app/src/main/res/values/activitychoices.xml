@@ -3,5 +3,7 @@
     <string-array name="select_activity_array">
         <item>No Activity</item>
         <item>Memory Game</item>
+        <item>Random Words</item>
+        <item>Random Pictures</item>
     </string-array>
 </resources>

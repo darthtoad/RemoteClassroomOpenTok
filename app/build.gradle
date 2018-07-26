@@ -20,8 +20,6 @@ android {
 
     buildTypes.each {
         it.buildConfigField 'String', 'API_KEY', ApiKey
-        it.buildConfigField 'String', 'SESSION_ID', SessionId
-        it.buildConfigField 'String', 'TOKEN', Token
         it.buildConfigField 'String', 'API_SECRET', ApiSecret
     }
 }
@@ -50,5 +48,7 @@ dependencies {
 configurations.all {
     resolutionStrategy.force 'com.android.support:support-v7:27.0.2'
 }
+
+
 
 apply plugin: 'com.google.gms.google-services'

@@ -1,4 +1,4 @@
-import { API_KEY, API_SECRET } from './constants';
+import { API_KEY, API_SECRET, PASSWORD, firebaseConfig } from './constants';
 
 const OpenTok = require('opentok');
 const express = require('express');
@@ -24,6 +24,14 @@ app.get('/token/:id', function(req, res) {
     const sessionId = req.params.id;
     token = opentok.generateToken(sessionId);
     res.send({token: token});
+})
+
+app.get('/firebase/:password', function(req, res) {
+    if (req.params.password === PASSWORD) {
+        res.send(firebaseConfig);
+    } else {
+        res.send({error: "Wrong Password"})
+    }
 })
 
 const requestHandler = (request, response) => {

@@ -1,5 +1,6 @@
 package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.view.MotionEventCompat;
@@ -33,6 +34,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -75,9 +77,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     private Publisher mPublisher;
     private Subscriber mSubscriber;
     private ImageButton mFlipScreen;
-    private Button mButtonLargeFragment;
-    private Button mButtonSmallFragment;
-    private Button mCreateSession;
     private Button mSignOut;
     private ImageButton mToggleAudio;
     private ImageButton mToggleVideo;
@@ -115,8 +114,8 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         String userId = user.getUid();
         Log.e("userId: ", userId);
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("users").child(userId);
-        Log.e(LOG_TAG, "getWordLists: " );
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        Log.e(LOG_TAG, databaseReference.toString());
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.e(LOG_TAG, "onDataChange: ");
@@ -152,6 +151,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 //                        }
 //                    }
                     listNameIndex++;
+                    Log.e(LOG_TAG, listNames.toString());
                 }
                 ArrayAdapter<String> adapter =  new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, listNames);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -166,7 +166,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     }
 
     public void getSessionId(final String name) {
-        String returnId = "";
         DatabaseReference sessionIds = FirebaseDatabase.getInstance().getReference().child("sessionIds");
         sessionIds.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -224,34 +223,34 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         }));
     }
 
-    public void fetchSessionConnectionData() {
-        RequestQueue reqQueue = Volley.newRequestQueue(this);
-        reqQueue.add(new JsonObjectRequest(Request.Method.GET,
-                "https://server-kzjldzvqns.now.sh" + "/session",
-                null, new Response.Listener<JSONObject>() {
-
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    sessionId = response.getString("sessionId");
-                    mSessionIdText.setText(sessionId);
-
-                    try {
-                        connectToSession(sessionId);
-                    } catch (OpenTokException ex) {
-                        Log.e(LOG_TAG, "OpenTokException" + ex.getMessage());
-                    }
-                } catch (JSONException error) {
-                    Log.e(LOG_TAG, "Web Service error: " + error.getMessage());
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(LOG_TAG, "Web Service error: " + error.getMessage());
-            }
-        }));
-    }
+//    public void fetchSessionConnectionData() {
+//        RequestQueue reqQueue = Volley.newRequestQueue(this);
+//        reqQueue.add(new JsonObjectRequest(Request.Method.GET,
+//                "https://server-kzjldzvqns.now.sh" + "/session",
+//                null, new Response.Listener<JSONObject>() {
+//
+//            @Override
+//            public void onResponse(JSONObject response) {
+//                try {
+//                    sessionId = response.getString("sessionId");
+//                    mSessionIdText.setText(sessionId);
+//
+//                    try {
+//                        connectToSession(sessionId);
+//                    } catch (OpenTokException ex) {
+//                        Log.e(LOG_TAG, "OpenTokException" + ex.getMessage());
+//                    }
+//                } catch (JSONException error) {
+//                    Log.e(LOG_TAG, "Web Service error: " + error.getMessage());
+//                }
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.e(LOG_TAG, "Web Service error: " + error.getMessage());
+//            }
+//        }));
+//    }
 
 
     @Override
@@ -292,11 +291,8 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
         if (EasyPermissions.hasPermissions(this, perms)) {
             mPublisherViewContainer = (FrameLayout)findViewById(R.id.publisher_container);
             mSubscriberViewContainer = (FrameLayout)findViewById(R.id.subscriber_container);
-            mCreateSession = (Button) findViewById(R.id.create_session);
             mJoinSession = (ImageButton) findViewById(R.id.join_session);
             mFlipScreen = (ImageButton) findViewById(R.id.button_toggle_screen);
-            mButtonLargeFragment = (Button) findViewById(R.id.button_large_fragment);
-            mButtonSmallFragment = (Button) findViewById(R.id.button_small_fragment);
             mDisconnect = (ImageButton) findViewById(R.id.disconnect);
             mFragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
             mVideoFrame = (FrameLayout) findViewById(R.id.videoFrame);
@@ -342,9 +338,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
 
 
             mFlipScreen.setOnClickListener(this);
-            mButtonSmallFragment.setOnClickListener(this);
-            mButtonLargeFragment.setOnClickListener(this);
-            mCreateSession.setOnClickListener(this);
             mJoinSession.setOnClickListener(this);
             mDisconnect.setOnClickListener(this);
             mSeparator.setOnTouchListener(this);
@@ -448,7 +441,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             final int action = MotionEventCompat.getActionMasked(event);
             switch (action) {
                 case MotionEvent.ACTION_DOWN: {
-                    Log.e(LOG_TAG, "ACTION_DOWN");
                     final int pointerIndex = MotionEventCompat.getActionIndex(event);
                     final float y = MotionEventCompat.getY(event, pointerIndex);
 
@@ -491,7 +483,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
                 }
 
                 case MotionEvent.ACTION_UP: {
-                    Log.e(LOG_TAG, "ACTION_UP");
                     mActivePointerId = INVALID_POINTER_ID;
                     break;
                 }
@@ -561,17 +552,11 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             }
         }
 
-        if (view == mCreateSession) {
-            fetchSessionConnectionData();
-            Log.i(LOG_TAG, "Session ID: " + sessionId);
-            mSession = new Session.Builder(this, API_KEY, sessionId).build();
-            mSession.setSessionListener(this);
-            mSession.connect(token);
-        }
-
         if (view == mJoinSession) {
             String name = mSessionIdText.getText().toString();
             getSessionId(name);
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
 
         if (view == mDisconnect) {
@@ -589,29 +574,6 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             signOut();
         }
 
-        if (view == mButtonLargeFragment) {
-            LinearLayout.LayoutParams paramsFragment = (LinearLayout.LayoutParams) mFragmentContainer.getLayoutParams();
-            LinearLayout.LayoutParams paramsMain = (LinearLayout.LayoutParams) mVideoFrame.getLayoutParams();
-            if (paramsMain.weight > 1) {
-                paramsFragment.weight++;
-                paramsMain.weight--;
-            }
-            mFragmentContainer.setLayoutParams(paramsFragment);
-            mVideoFrame.setLayoutParams(paramsMain);
-            Log.e("thing", "onClick: ");
-        }
-
-        if (view == mButtonSmallFragment) {
-            LinearLayout.LayoutParams paramsFragment = (LinearLayout.LayoutParams) mFragmentContainer.getLayoutParams();
-            LinearLayout.LayoutParams paramsMain = (LinearLayout.LayoutParams) mVideoFrame.getLayoutParams();
-            if (paramsFragment.weight > 1) {
-                paramsFragment.weight--;
-                paramsMain.weight++;
-            }
-            mFragmentContainer.setLayoutParams(paramsFragment);
-            mVideoFrame.setLayoutParams(paramsMain);
-            Log.e("thing", "onClick: ");
-        }
     }
 
     @Override
@@ -627,8 +589,12 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             if (parent.getItemAtPosition(pos).equals("No Activity")) {
                 mSession.sendSignal("Activity", "None");
             }
-        } else {
-            Toast.makeText(getApplicationContext(), "Please connect to a session", Toast.LENGTH_LONG).show();
+            if (parent.getItemAtPosition(pos).equals("Random Words")) {
+                mSession.sendSignal("Activity", "Random Words");
+            }
+            if (parent.getItemAtPosition(pos).equals("Random Pictures")) {
+                mSession.sendSignal("Activity", "Random Pictures");
+            }
         }
     }
 
@@ -649,6 +615,23 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
             if (data.equals("None")) {
                 mFragmentContainer.removeAllViews();
             }
+
+            if (data.equals("Random Words")) {
+                String wordListName = (String) mSelectWordListSpinner.getSelectedItem();
+                RandomWordFragment randomWordFragment = RandomWordFragment.newInstance(wordListName, sessionId);
+                android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragmentContainer, randomWordFragment);
+                fragmentTransaction.commit();
+            }
+
+            if (data.equals("Random Pictures")) {
+                String wordListName = (String) mSelectWordListSpinner.getSelectedItem();
+                RandomPictureFragment randomPictureFragment = RandomPictureFragment.newInstance(wordListName, sessionId);
+                android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragmentContainer, randomPictureFragment);
+                fragmentTransaction.commit();
+            }
+
         }
     }
 
