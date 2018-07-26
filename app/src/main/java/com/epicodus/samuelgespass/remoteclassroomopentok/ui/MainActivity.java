@@ -2,7 +2,6 @@ package com.epicodus.samuelgespass.remoteclassroomopentok.ui;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -193,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements Session.SessionLi
     public void connectToSession(String arg) throws OpenTokException {
         final String sessionId = arg;
         RequestQueue reqQueue = Volley.newRequestQueue(this);
-        String url = "https://server-kzjldzvqns.now.sh/token/" + sessionId;
+        String url = "https://server-glcucdwubw.now.sh/token/" + sessionId;
         Log.e(LOG_TAG, url);
         reqQueue.add(new JsonObjectRequest(Request.Method.GET,
                 url,

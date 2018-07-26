@@ -55,7 +55,7 @@ public class RandomPictureFragment extends Fragment implements Session.SessionLi
     public void connectToSession(String arg) throws OpenTokException {
         final String sessionId = arg;
         RequestQueue reqQueue = Volley.newRequestQueue(getContext());
-        String url = "https://server-kzjldzvqns.now.sh/token/" + sessionId;
+        String url = "https://server-glcucdwubw.now.sh/token/" + sessionId;
         reqQueue.add(new JsonObjectRequest(Request.Method.GET,
                 url,
                 null, new Response.Listener<JSONObject>() {

@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/wordTextView"
-        android:text="Click to see random word" />
+        android:textSize="75sp"
+        android:text="Random Word" />
 
 </FrameLayout>

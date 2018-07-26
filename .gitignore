@@ -12,3 +12,4 @@
 /server/node_modules/
 /server/dist
 /app/google-services.json
+/server/.env
